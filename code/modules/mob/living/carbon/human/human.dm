@@ -1591,3 +1591,6 @@
 
 /mob/living/carbon/human/species/shrimp //for the funnies only
 	race = /datum/species/shrimp
+
+/mob/living/carbon/human/species/grown_strong
+	race = /datum/species/grown_strong

@@ -19,7 +19,7 @@
 	melee_damage_lower = 4
 	melee_damage_upper = 5
 	melee_damage_type = RED_DAMAGE
-	attack_sound = 'sound/abnormalities/wayward_passenger/attack2.ogg'
+	attack_sound = 'sound/abnormalities/wayward_passenger/ripspace_hit.ogg'
 	can_breach = TRUE
 	can_buckle = FALSE
 	vision_range = 14

@@ -1164,7 +1164,7 @@
 	stuntime = 5	//Longer reach, gives you a short stun.
 	attack_verb_continuous = list("stabs", "slashes", "attacks")
 	attack_verb_simple = list("stab", "slash", "attack")
-	hitsound = 'sound/abnormalities/wayward_passenger/attack1.ogg'
+	hitsound = 'sound/abnormalities/wayward_passenger/ripspace_hit.ogg'
 	attribute_requirements = list(
 							JUSTICE_ATTRIBUTE = 40
 							)

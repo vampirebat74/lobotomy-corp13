@@ -1,4 +1,5 @@
 GLOBAL_VAR_INIT(emergency_level, TRUMPET_0)
+GLOBAL_VAR_INIT(music_list, list())
 
 SUBSYSTEM_DEF(lobotomy_emergency)
 	name = "Lobotomy Emergency System"
@@ -42,6 +43,7 @@ SUBSYSTEM_DEF(lobotomy_emergency)
 	RegisterSignal(SSdcs, COMSIG_GLOB_MOB_DEATH, PROC_REF(OnMobDeath))
 	RegisterSignal(SSdcs, COMSIG_GLOB_HUMAN_INSANE, PROC_REF(OnHumanInsane))
 	RegisterSignal(SSdcs, COMSIG_GLOB_ABNORMALITY_BREACH, PROC_REF(OnAbnoBreach))
+	GLOB.music_list = flist("[global.config.directory]/soundtrack/")
 	return ..()
 
 /datum/controller/subsystem/lobotomy_emergency/proc/OnMobDeath(datum/source, mob/living/died, gibbed)

@@ -519,3 +519,5 @@
 	melee_damage_upper = 25
 	nail_delay = 0.5 SECONDS
 	hammer_aoe = 2
+
+//use /mob/living/simple_animal/hostile/aquatic for whales and ships

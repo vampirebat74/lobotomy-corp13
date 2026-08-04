@@ -113,3 +113,56 @@ GLOBAL_LIST_INIT(atziluth, list(//ALEPH
 	name = "department_center"
 	spawner = /obj/effect/landmark/department_center
 
+/obj/effect/landmark/lake_generator
+	name = "lake_generator"
+	icon_state = "random_room"
+	var/size = 16
+	var/affected_turfs = list()
+	var/corners = list()//list of corner pieces
+
+/obj/effect/landmark/lake_generator/Initialize()
+	addtimer(CALLBACK(src, PROC_REF(GenerateLake)), 200)
+	..()
+
+/obj/effect/landmark/lake_generator/proc/GenerateLake()
+	var/area/great_lake/random_lake/A = new()
+	var/list/diagonals = GLOB.diagonals.Copy()
+	//randomly assign size here
+
+	var/turf/corner_NW = get_ranged_target_turf(src, diagonals[2], size)
+	var/turf/corner_SE = get_ranged_target_turf(src, diagonals[3], size)
+
+
+	for(var/turf/T in block(corner_NW, corner_SE))//generate the initial square
+		if(!istype(T, /turf/open/water/deep))
+			continue
+		affected_turfs += T
+
+/*
+	if(prob(10))//Starting point- lakes must become larger, rather than smaller. Think of some algorithms for trapezoids and stuff
+		var/list/myline = getline(corner_NW, corner_SE)
+		var mydir = pick(GLOB.cardinals)
+		for(var/turf/T in myline)
+			if(T in affected_turfs)
+				affected_turfs -= T
+				for(var/i = 1; i < size; ++i)
+					var/turf/B = get_ranged_target_turf(T, mydir, i)
+					affected_turfs -= B
+*/
+
+	for(var/turf/T in affected_turfs)//Initialize the lakes
+		A.contents += T
+	A.ColorWater()
+	A.test_gen()
+	qdel(src)
+
+/obj/effect/landmark/middle_generator
+	name = "middle_ship"
+	icon_state = "random_room"
+
+/obj/effect/landmark/middle_generator/Initialize(mapload)//Generate the boat with a bit of randomness - doesn't need to be super precise
+	..()
+	var/offset = rand(-64, 64)
+	var/turf/T = get_ranged_target_turf(loc, pick(GLOB.alldirs), offset)
+	new /obj/structure/middle_ship(get_turf(T))
+	return INITIALIZE_HINT_QDEL

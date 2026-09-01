@@ -7,10 +7,11 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	icon = 'icons/obj/vehicles.dmi'
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | UNACIDABLE | ACID_PROOF
 	can_buckle = FALSE
+	var/list/shipturfs = list()
 	var/capacity = list()
 	var/mob/living/driver
 	var/obj/structure/boat_interior/interior
-	var/mob/living/sailor
+	var/datum/sailor/my_sailor
 	max_occupants = 1
 
 /obj/vehicle/sealed/adventure_boat/Initialize()
@@ -19,6 +20,8 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 		if(myboat.current_vessel)
 			continue
 		interior = myboat
+		for(var/turf/open/T in view(12, myboat))
+			shipturfs += T
 		myboat.current_vessel = src
 		GLOB.lobotomy_boats -= myboat
 		break
@@ -58,18 +61,29 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	. = step(src,direction, dir)
 
 /obj/vehicle/sealed/adventure_boat/add_occupant(mob/M, control_flags)
-	RegisterSignal(M, COMSIG_LIVING_DEATH, PROC_REF(mob_exit))
-	//RegisterSignal(M, COMSIG_MOB_CLICKON, PROC_REF(on_mouseclick))
-	//RegisterSignal(M, COMSIG_MOB_SAY, PROC_REF(display_speech_bubble))
+	//RegisterSignal(M, COMSIG_LIVING_DEATH, PROC_REF(mob_exit)) - Causes a runtime, hopefully nothing bad comes from disabling this
 	. = ..()
 	update_icon()
 
 /obj/vehicle/sealed/adventure_boat/say(message as text, language, ignore_spam, forced, sanitize, spans)
-	if(!sailor)//The boat should generally not speak without a sailor present
+	if(!my_sailor)//The boat should generally not speak without a sailor present
 		return ..()
-	name = sailor.name
+	name = my_sailor.name
 	..()
 	name = initial(name)
+
+/obj/vehicle/sealed/adventure_boat/proc/AddSailor(datum/sailor/D)
+	my_sailor = D
+	var/spawned = FALSE
+	for(var/turf/T in shipturfs)
+		for(var/obj/effect/landmark/sailor_spawn/L in T)
+			D.landmark = L
+			D.RespawnMob()
+			to_chat(world, "L [L] has been assigned and RespawnMob() has been called on datum [D]")
+			spawned = TRUE
+			break
+	if(!spawned)
+		to_chat(world, "AddSailor on [D] has failed to activate. Check if the landmark has been found.")
 
 /obj/vehicle/sealed/adventure_boat/skiff
 	name = "skiff"
@@ -130,3 +144,68 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 		user.forceMove(current_vessel)
 	else
 		user.forceMove(locate(128, 4, 7))//un-hardcode this
+
+//SAILOR DATUMS// These are very similar to abnormality datums
+
+/datum/sailor
+	var/name = "Sailor"
+	/// We'll use abnormality risk levels as a comparable metric for its tier
+	var/threat_level = ZAYIN_LEVEL
+	var/mob/living/simple_animal/hostile/sailor/mob_path
+	/// Reference to the door we own, only used for records swapping
+	var/obj/machinery/door/airlock/door
+	/// Reference to current mob, if alive
+	var/mob/living/simple_animal/hostile/sailor/current
+	/// Reference to respawn landmark
+	var/obj/effect/landmark/sailor_spawn/landmark
+
+/datum/sailor/New(obj/effect/landmark/sailor_spawn/new_landmark, mob/living/simple_animal/hostile/sailor/new_type)
+	if(!new_landmark)
+		CRASH("Sailor datum was created without reference to landmark.")
+	if(!ispath(new_type))
+		CRASH("Sailor datum was created without a path to the mob.")
+	landmark = new_landmark
+	mob_path = new_type
+	name = initial(mob_path.name)
+	to_chat(world, "Sailor datum has been created with mob path [mob_path]. Calling RespawnMob()!")
+
+/datum/sailor/proc/RespawnMob()//doesn't work
+	if(!istype(landmark))
+		CRASH("Couldn't respawn an sailor [initial(mob_path.name)] due to missing landmark.")
+	if(!ispath(mob_path))
+		CRASH("Sailor tried to respawn a mob, but mob path wasn't valid.")
+	if(istype(current))
+		to_chat(world, "sailor failed istype() check")
+		return
+	var/turf/T = get_turf(landmark)
+	current = new mob_path(T)
+	to_chat(world, "Creating sailor mob [current] at landmark located at [T]")
+	current.datum_reference = src
+	current.setDir(WEST)
+	name = current.name
+
+/obj/structure/sailor_spawner //DEBUG OBJECT, REMOVE FROM PULL REQUEST
+	name = "sailor spawner"
+	desc = "A place to buy sailors"
+	icon = 'icons/obj/vending.dmi'
+	icon_state = "liberationstation"
+	anchored = TRUE
+	density = TRUE
+	var/obj/vehicle/sealed/adventure_boat/mom
+	var/datum/sailor/dad
+	var/mob_path = /mob/living/simple_animal/hostile/sailor/noob
+
+/obj/structure/sailor_spawner/attack_hand(mob/living/carbon/human/user)//whatever's going on here doesn't work
+	say("Attempting to spawn a sailor!")
+	for(var/obj/structure/boat_interior/I in view())
+		mom = I.current_vessel
+		if(!mom)
+			say("Vessel not found!")
+			return
+		if(mom.my_sailor)
+			say("Vessel already has a sailor!")
+			return
+		dad = new(new_landmark = I, new_type = mob_path)
+		//dad.mob_path = mob_path
+		mom.AddSailor(dad)
+		say("AddSailor has been called!")

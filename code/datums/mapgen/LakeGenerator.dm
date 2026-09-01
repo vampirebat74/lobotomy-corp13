@@ -164,6 +164,7 @@ GLOBAL_LIST_INIT(lake_colors, list(
 	var/law_list = list("MOVE_DIR", "MOVE_SPECIFIC", "HOSTILE", "TIMER", "INHABITED", "TIME_LIMIT")
 	var/generated = FALSE
 	var/water_color
+	var/risk_level = 1
 
 
 /area/great_lake/Initialize(mapload)

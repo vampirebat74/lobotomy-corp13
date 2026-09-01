@@ -1,4 +1,8 @@
 //MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
+"a" = (
+/obj/effect/landmark/sailor_spawn,
+/turf/open/floor/wood,
+/area/city)
 "b" = (
 /obj/machinery/status_display/evac{
 	pixel_y = 32
@@ -25,12 +29,9 @@
 /turf/open/water/deep,
 /area/space)
 "h" = (
-/obj/structure/lattice/catwalk/indestructible,
-/obj/structure/railing/indestructible{
-	dir = 1
-	},
-/turf/open/floor/engine,
-/area/city)
+/obj/effect/landmark/lake_generator/waw,
+/turf/open/water/deep,
+/area/space)
 "i" = (
 /obj/machinery/light/small,
 /turf/open/floor/wood,
@@ -99,6 +100,10 @@
 	},
 /turf/open/floor/wood,
 /area/city)
+"A" = (
+/obj/structure/sailor_spawner,
+/turf/open/floor/wood,
+/area/city)
 "B" = (
 /obj/structure/boat_interior,
 /turf/open/floor/wood,
@@ -110,6 +115,10 @@
 /obj/machinery/camera/autoname,
 /turf/open/floor/wood,
 /area/city)
+"D" = (
+/obj/effect/landmark/lake_generator/teth,
+/turf/open/water/deep,
+/area/space)
 "E" = (
 /obj/structure/boat_shop,
 /turf/open/floor/wood,
@@ -129,6 +138,13 @@
 /obj/machinery/regenerator,
 /turf/open/floor/wood,
 /area/city)
+"L" = (
+/obj/structure/lattice/catwalk/indestructible,
+/obj/structure/railing/indestructible{
+	dir = 1
+	},
+/turf/open/floor/engine,
+/area/city)
 "M" = (
 /turf/closed/indestructible/wood,
 /area/city)
@@ -140,6 +156,10 @@
 	footstep = "plating"
 	},
 /area/city)
+"R" = (
+/obj/effect/landmark/lake_generator/he,
+/turf/open/water/deep,
+/area/space)
 "T" = (
 /obj/structure/lattice/catwalk/indestructible,
 /obj/structure/railing/indestructible{
@@ -152,6 +172,10 @@
 	footstep = "plating"
 	},
 /area/city)
+"U" = (
+/obj/effect/landmark/lake_generator/aleph,
+/turf/open/water/deep,
+/area/space)
 "V" = (
 /obj/effect/boatspawn,
 /turf/open/water/deep/polluted{
@@ -1458,7 +1482,7 @@ r
 M
 Z
 B
-Z
+A
 Z
 M
 r
@@ -2487,7 +2511,7 @@ M
 K
 Z
 Z
-Z
+a
 M
 r
 X
@@ -2734,7 +2758,7 @@ M
 K
 Z
 Z
-Z
+a
 M
 r
 "}
@@ -4040,7 +4064,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -4072,7 +4096,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -4104,7 +4128,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -4136,7 +4160,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -4168,7 +4192,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -4200,7 +4224,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -4232,7 +4256,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -12264,7 +12288,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -12296,7 +12320,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -12328,7 +12352,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -12360,7 +12384,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -12392,7 +12416,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -12424,7 +12448,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -12456,7 +12480,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -12487,7 +12511,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -20488,7 +20512,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -20520,7 +20544,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -20552,7 +20576,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -20584,7 +20608,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -20616,7 +20640,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -20648,7 +20672,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -28712,6 +28736,7 @@ X
 X
 X
 X
+U
 X
 X
 X
@@ -28743,6 +28768,7 @@ X
 X
 X
 X
+U
 X
 X
 X
@@ -28774,6 +28800,7 @@ X
 X
 X
 X
+h
 X
 X
 X
@@ -28805,6 +28832,7 @@ X
 X
 X
 X
+h
 X
 X
 X
@@ -28836,6 +28864,7 @@ X
 X
 X
 X
+R
 X
 X
 X
@@ -28867,6 +28896,7 @@ X
 X
 X
 X
+D
 X
 X
 X
@@ -28898,13 +28928,7 @@ X
 X
 X
 X
-X
-X
-X
-X
-X
-X
-X
+G
 X
 X
 X
@@ -32798,7 +32822,7 @@ P
 P
 P
 V
-h
+L
 l
 l
 Z
@@ -33055,7 +33079,7 @@ P
 P
 P
 V
-h
+L
 l
 l
 Z
@@ -36422,6 +36446,7 @@ X
 X
 X
 X
+U
 X
 X
 X
@@ -36453,6 +36478,7 @@ X
 X
 X
 X
+U
 X
 X
 X
@@ -36484,6 +36510,7 @@ X
 X
 X
 X
+h
 X
 X
 X
@@ -36515,6 +36542,7 @@ X
 X
 X
 X
+h
 X
 X
 X
@@ -36546,6 +36574,7 @@ X
 X
 X
 X
+R
 X
 X
 X
@@ -36577,6 +36606,7 @@ X
 X
 X
 X
+D
 X
 X
 X
@@ -36608,13 +36638,7 @@ X
 X
 X
 X
-X
-X
-X
-X
-X
-X
-X
+G
 X
 X
 X
@@ -44646,7 +44670,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -44678,7 +44702,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -44710,7 +44734,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -44742,7 +44766,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -44774,7 +44798,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -44806,7 +44830,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -52870,7 +52894,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -52902,7 +52926,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -52934,7 +52958,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -52966,7 +52990,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -52998,7 +53022,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -53030,7 +53054,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -53062,7 +53086,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -53093,7 +53117,7 @@ X
 X
 X
 X
-G
+D
 X
 X
 X
@@ -61094,7 +61118,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -61126,7 +61150,7 @@ X
 X
 X
 X
-G
+U
 X
 X
 X
@@ -61158,7 +61182,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -61190,7 +61214,7 @@ X
 X
 X
 X
-G
+h
 X
 X
 X
@@ -61222,7 +61246,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -61254,7 +61278,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -61286,7 +61310,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -61317,7 +61341,7 @@ X
 X
 X
 X
-G
+R
 X
 X
 X
@@ -64938,7 +64962,7 @@ M
 K
 Z
 Z
-Z
+a
 M
 r
 X
@@ -65185,7 +65209,7 @@ M
 K
 Z
 Z
-Z
+a
 M
 r
 "}

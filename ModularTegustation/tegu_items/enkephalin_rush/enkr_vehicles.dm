@@ -98,6 +98,8 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	//icon_state = "sloop"
 	max_occupants = 4
 
+//*** Boat Shop Stuff ***// Consider moving this to a separate file
+
 /obj/structure/boat_shop
 	name = "boat shop"
 	desc = "A place to buy boats"
@@ -106,6 +108,8 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	anchored = TRUE
 	density = TRUE
 	var/list/dock = list()
+	var/list/current_boats = list()
+	var/obj/vehicle/sealed/adventure_boat/picked_type
 
 /obj/structure/boat_shop/attack_hand(mob/living/carbon/human/user)
 	if(!LAZYLEN(dock))
@@ -119,7 +123,35 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	else
 		say("Enjoy your free boat trial!")
 		var/obj/effect/T = pick(dock)
-		new /obj/vehicle/sealed/adventure_boat/skiff(get_turf(T))
+		picked_type = new(get_turf(T))
+		current_boats += picked_type
+
+/obj/structure/boat_shop/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, ui)
+	if(!ui)
+		ui = new(user, src, "Boat Shop", name)
+		ui.set_autoupdate(FALSE)
+		ui.open()
+
+/obj/structure/boat_shop/ui_data(mob/user)
+	. = list()
+
+	var/listofitems = list()
+	for (var/I in current_boats)
+		var/atom/movable/O = I
+		if (!QDELETED(O))
+			var/md5name = md5(O.name) // This needs to happen because of a bug in a TGUI component, https://github.com/ractivejs/ractive/issues/744
+			if (listofitems[md5name]) // which is fixed in a version we cannot use due to ie8 incompatibility
+				listofitems[md5name]["amount"]++ // The good news is, #30519 made smartfridge UIs non-auto-updating
+			else
+				listofitems[md5name] = list("name" = O.name, "type" = O.type, "amount" = 1)
+	sortList(listofitems)
+
+	.["contents"] = listofitems
+	.["name"] = name
+
+/obj/structure/boat_shop/handle_atom_del(atom/A) // Update the UIs in case something inside gets deleted
+	SStgui.update_uis(src)
 
 /obj/effect/boatspawn
 	icon = 'icons/mob/landmarks.dmi'

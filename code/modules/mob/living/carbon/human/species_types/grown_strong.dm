@@ -14,9 +14,6 @@
 		return TRUE
 	return FALSE
 
-/datum/species/grown_strong/on_species_gain(mob/living/carbon/C, datum/species/old_species)
-	..()
-
 /mob/living/carbon/human/species/grown_strong/Initialize(mapload, cubespawned=FALSE, mob/spawner)
 	. = ..()
 	INVOKE_ASYNC(src, PROC_REF(replace_body))

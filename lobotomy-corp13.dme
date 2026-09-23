@@ -2712,6 +2712,7 @@
 #include "code\modules\mob\living\carbon\human\species_types\shrimp.dm"
 #include "code\modules\mob\living\carbon\human\species_types\skeletons.dm"
 #include "code\modules\mob\living\carbon\human\species_types\snail.dm"
+#include "code\modules\mob\living\carbon\human\species_types\sweeper.dm"
 #include "code\modules\mob\living\carbon\human\species_types\synths.dm"
 #include "code\modules\mob\living\carbon\human\species_types\vampire.dm"
 #include "code\modules\mob\living\carbon\human\species_types\zombies.dm"

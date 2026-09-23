@@ -1594,3 +1594,6 @@
 
 /mob/living/carbon/human/species/grown_strong
 	race = /datum/species/grown_strong
+
+/mob/living/carbon/human/species/sweeper
+	race = /datum/species/sweeper

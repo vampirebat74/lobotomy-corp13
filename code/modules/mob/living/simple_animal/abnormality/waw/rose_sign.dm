@@ -54,6 +54,16 @@
 			Blossoms of flowers sprawled on the ground substitute its screams."),
 	)
 
+	work_start_lines = list("%ABNO's many eyes stare intently at %PERSON.")
+	early_work_lines = list("%ABNO comments on %PERSON's sins, hoping the seeds will bloom most terribly.", "%ABNO asks about %PERSON's desires.")
+	middle_work_lines = list("Have you ever felt an all-consuming Wrath overtake you, that only ashes remained when it cleared?",
+	"Were you ever so overcome with Sloth, that in your indolence your life completely passed you by?",
+	"Have the thorns of Envy ever wound so tightly around your heart, that it strangled your love away?", "Did you ever fall into a Gloom so deep, it felt like you were drowning?")
+	late_work_lines = list("Did you ever feel the Lust to leave a trace of yourself so passionately, you painted over someone else's colors with your own?",
+	"Have you ever felt Pride in yourself so all-encompassing, you trampled on the hands of others to climb to greater heights?",
+	"Was there a moment when your Gluttony was so powerful, you robbed someone else of everything just to feel a little more complete?")
+	work_end_lines = list("Wish, wish for it. Knowing that it is a sin. Only then can you bloom such colorful roses.", "Everyone has wishes. To deny them is to deny yourself.")
+
 	var/list/work_roses = list()
 	var/list/work_damages = list()
 	var/list/summoned_roses = list()
@@ -331,7 +341,7 @@
 	alpha = 1
 	for(var/mob/living/carbon/human/H in view(3, src))//big, big AOE
 		grabbed = TRUE
-		H.deal_damage(boom_damage, BLACK_DAMAGE)
+		H.deal_damage(boom_damage, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 		if(H.buckled)//Otherwise it would rip people off their crucifixes. Not too exploitable
 			continue
 		H.forceMove(get_turf(src))//pulls them all to the target
@@ -363,7 +373,7 @@
 	for(var/turf/T in view(0, target_turf))
 		new /obj/effect/temp_visual/thornspike(T)
 		for(var/mob/living/L in T)
-			L.deal_damage(root_damage, damtype)
+			L.deal_damage(root_damage, damtype, attack_type = (ATTACK_TYPE_SPECIAL))
 			if(L.stat == DEAD)
 				if(L.has_status_effect(/datum/status_effect/stacking/crownthorns))//Stops a second crucifix from appearing
 					L.remove_status_effect(STATUS_EFFECT_THORNS)

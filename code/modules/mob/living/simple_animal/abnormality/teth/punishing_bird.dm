@@ -50,7 +50,7 @@
 
 	ego_list = list(
 		/datum/ego_datum/weapon/beak,
-		/datum/ego_datum/weapon/beakmagnum,
+		/datum/ego_datum/weapon/beaksmg,
 		/datum/ego_datum/armor/beak,
 	)
 	gift_type =  /datum/ego_gifts/beak
@@ -68,6 +68,12 @@
 		"Little bird" = list(TRUE, "The small bird accepts whatever name you decide to give it. Its nature can never change now."),
 		"Punishing bird" = list(TRUE, "The small bird accepts whatever name you decide to give it. Its nature can never change now."),
 	)
+
+	work_start_lines = list("The employees put a perch in %ABNO's Containment Unit because it seemed to be bored.",
+	"%ABNO feels like it's back in the forest in which it used to live when sitting on its perch.")
+	middle_work_lines = list("A majority of the time %ABNO acts like any other normal bird, flying here and there in the Containment Unit.",
+	"%ABNO never cheeps or chirps. However, its stomach occasionally twitches.")
+	work_end_lines = list("Few employees know of %ABNO's hidden teeth.", "Not many know about %ABNO's disgusting flesh, which splits apart into several sections.")
 
 	do_not_possess = TRUE
 
@@ -207,7 +213,7 @@
 				if(L in pecking_targets)
 					pecking_targets -= L
 					already_punished |= L
-				target = null
+				LoseTarget(FALSE)
 		else if(L.health <= 0)
 			visible_message(span_danger("\The [src] devours [L]!"))
 			L.gib()

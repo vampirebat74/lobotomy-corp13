@@ -43,7 +43,7 @@
 		/obj/item/clothing/suit/armor/ego_gear/waw/oppression 		= /obj/item/clothing/suit/armor/ego_gear/realization/cruelty,
 		/obj/item/clothing/suit/armor/ego_gear/waw/thirteen 		= /obj/item/clothing/suit/armor/ego_gear/realization/bell_tolls,
 		/obj/item/clothing/suit/armor/ego_gear/waw/executive 		= /obj/item/clothing/suit/armor/ego_gear/realization/capitalism,
-		/obj/item/clothing/suit/armor/ego_gear/waw/assonance		= /obj/item/clothing/suit/armor/ego_gear/realization/duality_yang,
+		/obj/item/clothing/suit/armor/ego_gear/waw/accord		= /obj/item/clothing/suit/armor/ego_gear/realization/duality_yang,
 		/obj/item/clothing/suit/armor/ego_gear/waw/discord			= /obj/item/clothing/suit/armor/ego_gear/realization/duality_yin,
 		/obj/item/clothing/suit/armor/ego_gear/waw/heart			= /obj/item/clothing/suit/armor/ego_gear/realization/repentance,
 		/obj/item/clothing/suit/armor/ego_gear/waw/exuviae			= /obj/item/clothing/suit/armor/ego_gear/realization/nest,
@@ -121,7 +121,7 @@
 		to_chat(user, span_warning("The true potential of [I] cannot be realized."))
 		return
 
-	if((istype(I, /obj/item/clothing/suit/armor/ego_gear/waw/discord) || istype(I, /obj/item/clothing/suit/armor/ego_gear/waw/assonance)) && !YinYangCheck())
+	if((istype(I, /obj/item/clothing/suit/armor/ego_gear/waw/discord) || istype(I, /obj/item/clothing/suit/armor/ego_gear/waw/accord)) && !YinYangCheck())
 		to_chat(user, span_warning("The true potential of [I] cannot be realized without the other half."))
 		return
 
@@ -133,7 +133,7 @@
 	for(var/attribute in user.attributes)
 		stat_total += get_raw_level(user, attribute)
 
-	if(stat_total < 520) // ~130 in all stats required
+	if(stat_total < 500) // ~125 in all stats required
 		to_chat(user, span_warning("You are too weak to use this machine."))
 		return
 
@@ -143,7 +143,7 @@
 		return
 
 	qdel(I)
-	user.adjust_all_attribute_levels(-20)
+	user.adjust_all_attribute_levels(-10)
 	realized_users |= user.ckey
 	var/atom/new_item = new item_out(get_turf(user))
 	user.put_in_hands(new_item)

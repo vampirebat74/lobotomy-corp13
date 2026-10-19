@@ -119,7 +119,7 @@
 		return
 	if((ishuman(hit_atom)))
 		var/mob/living/carbon/M = hit_atom
-		M.apply_damage(10, STAMINA)
+		M.deal_damage(10, STAMINA, source = throwingdatum.thrower, attack_type = (ATTACK_TYPE_RANGED))
 		if(prob(75))
 			M.Paralyze(60)
 			visible_message(span_danger("[M] barely manages to contain the power of the [src]!"))
@@ -130,7 +130,7 @@
 		playsound(src, 'sound/abnormalities/crying_children/sorrow_shot.ogg', 45, FALSE, 5)
 		for(var/mob/living/L in view(1, src))
 			var/aoe = 50
-			L.apply_damage(aoe, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			L.deal_damage(aoe, RED_DAMAGE, throwingdatum.thrower, attack_type = (ATTACK_TYPE_RANGED))
 			new /obj/effect/temp_visual/small_smoke/halfsecond(get_turf(L))
 	activated = FALSE
 
@@ -163,6 +163,7 @@
 							)
 
 	charge = TRUE
+	ability_type = ABILITY_UNIQUE
 	charge_cost = 10
 	charge_cap = 10
 	charge_effect = "Can be used to perform an indiscriminate heavy red damage jump attack."
@@ -202,6 +203,7 @@
 	if(do_after(user, 5, src))
 		var/turf/target = get_turf(A)
 		currently_charging = FALSE
+		charge_amount -= charge_cost
 		playsound(src, 'sound/effects/ordeals/violet/midnight_portal_off.ogg', 50, FALSE, -1)
 		animate(user, alpha = 1,pixel_x = 0, pixel_z = 16, time = 0.1 SECONDS)
 		user.pixel_z = 16
@@ -233,7 +235,7 @@
 		aoe_damage *= force_multiplier
 		if(L == user) //This WILL friendly fire there is no escape
 			continue
-		L.apply_damage(aoe_damage, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe_damage, RED_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		to_chat(L, span_userdanger("You are crushed by a monolith!"))
 		if(L.health < 0)
 			L.gib()

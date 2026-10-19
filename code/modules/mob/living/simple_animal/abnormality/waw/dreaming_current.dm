@@ -54,6 +54,9 @@
 		"Don't eat the candy" = list(FALSE, "I don't eat the candy given to me. <br>When will mom and dad come? <br>Why aren't they here? <br>It doesn't stop hurting, <br>I'm scared..."),
 	)
 
+	work_start_lines = list("%ABNO's dreams are those of running outside of the facility in total freedom.")
+	middle_work_lines = list("Just as everyone wished for, %ABNO can live here forever.")
+
 	var/list/movement_path = list()
 	var/list/been_hit = list()
 	var/charging = FALSE
@@ -203,7 +206,7 @@
 			COLOR_PURPLE,
 		)
 		S.add_atom_colour(pick(potential_colors), FIXED_COLOUR_PRIORITY)
-		var/list/new_hits = HurtInTurf(TF, been_hit, dash_damage, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE) - been_hit
+		var/list/new_hits = HurtInTurf(TF, been_hit, dash_damage, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)) - been_hit
 		been_hit += new_hits
 		for(var/mob/living/L in new_hits)
 			visible_message(span_boldwarning("[src] bites [L]!"))

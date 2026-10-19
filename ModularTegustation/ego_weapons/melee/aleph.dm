@@ -45,7 +45,7 @@
 			new /obj/effect/temp_visual/justitia_effect(T)
 			var/justicemod = get_attack_multiplier(user)
 			var/damage_dealt = aoe_damage * justicemod * force_multiplier
-			user.HurtInTurf(T, list(), damage_dealt, PALE_DAMAGE)
+			user.HurtInTurf(T, list(), damage_dealt, PALE_DAMAGE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		else
 			hitsound = 'sound/weapons/ego/justitia1.ogg'
 			user.changeNext_move(CLICK_CD_MELEE * 0.4)
@@ -186,7 +186,7 @@
 			aoe*=force_multiplier
 			if(L == user || ishuman(L))
 				continue
-			been_hit = user.HurtInTurf(T, been_hit, aoe, RED_DAMAGE, hurt_mechs = TRUE, hurt_structure = TRUE)
+			been_hit = user.HurtInTurf(T, been_hit, aoe, RED_DAMAGE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE))
 
 /obj/item/ego_weapon/mimicry/get_clamped_volume()
 	return 40
@@ -433,7 +433,7 @@
 		for(var/mob/living/L in range(aoe_range, user)) //knocks enemies away from you
 			if(L == user || ishuman(L))
 				continue
-			L.apply_damage(aoe, damtype, null, L.run_armor_check(null, damtype), spread_damage = TRUE)
+			L.deal_damage(aoe, damtype, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			if(firsthit)
 				aoe = (aoe / 2)
 				firsthit = FALSE
@@ -500,19 +500,28 @@
 	to_chat(user, span_notice("[src] will now deal [force] [damtype] damage."))
 	playsound(src, 'sound/items/screwdriver2.ogg', 50, TRUE)
 
-/obj/item/ego_weapon/censored
+/obj/item/ego_weapon/shield/censored
 	name = "CENSORED"
 	desc = "(CENSORED) has the ability to (CENSORED), but this is a horrendous sight for those watching. \
 			Looking at the E.G.O for more than 3 seconds will make you sick."
-	special = "Using it in hand will activate its special ability. To perform this attack - click on a distant target."
+	special = "This weapon performs a counterattack upon a successful block."
 	icon_state = "censored"
 	worn_icon_state = "censored"
-	force = 35	//there's a focus on the ranged attack here.
+	force = 22	//there's a focus on the parry attack here.
+	attack_speed = 0.7
 	damtype = BLACK_DAMAGE
 	swingstyle = WEAPONSWING_THRUST
-	attack_verb_continuous = list("attacks")
-	attack_verb_simple = list("attack")
+	attack_verb_continuous = list("(CENSORED)")
+	attack_verb_simple = list("(CENSORED)")
 	hitsound = 'sound/weapons/ego/censored1.ogg'
+	reductions = list(60, 60, 70, 50) // 240
+	projectile_block_duration = 0.7 SECONDS
+	block_duration = 3 SECONDS
+	block_cooldown = 2.5 SECONDS
+	block_sound = 'sound/weapons/ego/censored1.ogg'
+	block_message = "Your weapon attempts to (CENSORED) the attack!"
+	projectile_block_message = "You (CENSORED) the projectile!"
+	block_cooldown_message = "You rearm your E.G.O."
 	attribute_requirements = list(
 							FORTITUDE_ATTRIBUTE = 100,
 							PRUDENCE_ATTRIBUTE = 80,
@@ -520,45 +529,39 @@
 							JUSTICE_ATTRIBUTE = 80
 							)
 
-	var/special_attack = FALSE
-	var/special_damage = 120
-	var/special_cooldown
-	var/special_cooldown_time = 10 SECONDS
+	var/special_damage = 60
 	var/special_checks_faction = TRUE
+	var/reflect_cooldown
+	var/reflect_cooldown_time = 5 //beam spam is very bad.
 
-/obj/item/ego_weapon/censored/attack_self(mob/living/user)
-	if(!CanUseEgo(user))
-		return
-	if(special_cooldown > world.time)
-		return
-	special_attack = !special_attack
-	if(special_attack)
-		to_chat(user, span_notice("You prepare special attack."))
-	else
-		to_chat(user, span_notice("You decide to not use special attack."))
+/obj/item/ego_weapon/shield/censored/Initialize()
+	. = ..()
+	aggro_on_block *= 2
 
-/obj/item/ego_weapon/censored/afterattack(atom/A, mob/living/user, proximity_flag, params)
-	if(!CanUseEgo(user))
-		return
-	if(special_cooldown > world.time)
-		return
-	if(!special_attack)
-		return
-	special_attack = FALSE
-	var/turf/target_turf = get_ranged_target_turf_direct(user, A, 4)
-	var/list/turfs_to_hit = getline(user, target_turf)
-	for(var/turf/T in turfs_to_hit)
-		if(T.density)
-			break
-		new /obj/effect/temp_visual/cult/sparks(T)
+/obj/item/ego_weapon/shield/censored/EnableBlock(mob/living/carbon/human/user)
 	playsound(user, 'sound/weapons/ego/censored2.ogg', 75)
-	special_cooldown = world.time + special_cooldown_time
-	if(!do_after(user, 7, src))
+	return ..()
+
+/obj/item/ego_weapon/shield/censored/AnnounceBlock(mob/living/carbon/human/source, damage, damagetype, def_zone, mob/attacker, damage_flags, attack_type)
+	. = ..()
+	if(damage <= 0 || source == attacker || !isliving(attacker) || (attack_type & (ATTACK_TYPE_COUNTER | ATTACK_TYPE_ENVIRONMENT | ATTACK_TYPE_STATUS)))
 		return
-	playsound(user, 'sound/weapons/ego/censored3.ogg', 75)
+	if(!(attacker in livinginview(4, source)))
+		return
+	INVOKE_ASYNC(src, PROC_REF(Reflect), source, attacker)
+
+/obj/item/ego_weapon/shield/censored/proc/Reflect(mob/living/carbon/human/user, mob/living/attacker)
+	if(!block)
+		return
+	if(reflect_cooldown > world.time)
+		return
+	reflect_cooldown = world.time + reflect_cooldown_time
+
+	var/list/turfs_to_hit = getline(user, attacker)
 	var/turf/MT = get_turf(user)
-	MT.Beam(target_turf, "censored", time=5)
-	var/modified_damage = (special_damage * force_multiplier)
+	playsound(user, 'sound/weapons/ego/censored3.ogg', 75)
+	MT.Beam(get_turf(attacker), "censored", time=5)
+	var/modified_damage = (special_damage * force_multiplier * get_attack_multiplier(user))
 	for(var/turf/T in turfs_to_hit)
 		if(T.density)
 			break
@@ -570,10 +573,12 @@
 						continue
 				else
 					continue
-			L.apply_damage(modified_damage, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
-			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
+			L.deal_damage(modified_damage, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_COUNTER))
+	attacker.visible_message(span_danger("[user]'s [src] (CENSORED) at [attacker]!"), \
+					span_userdanger("[user]'S [src] (CENSORED) at you!"), vision_distance = COMBAT_MESSAGE_RANGE, ignored_mobs = user)
+	to_chat(user, span_danger("Your [src] (CENSORED) at [attacker]!"))
 
-/obj/item/ego_weapon/censored/get_clamped_volume()
+/obj/item/ego_weapon/shield/censored/get_clamped_volume()
 	return 30
 
 /obj/item/ego_weapon/soulmate
@@ -741,7 +746,7 @@
 		return
 	var/justicemod = get_attack_multiplier(user)
 	var/damage = force * justicemod * force_multiplier
-	target.apply_damage(damage, BLACK_DAMAGE, null, target.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+	target.deal_damage(damage, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE))
 
 	if(!canaoe)
 		return
@@ -763,8 +768,8 @@
 	for(var/mob/living/L in range(2, start))
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
-		L.apply_damage(aoe, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_SPECIAL))
+		L.deal_damage(aoe, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_SPECIAL))
 
 /obj/item/ego_weapon/space/EgoAttackInfo(mob/user)
 	if(force_multiplier != 1)
@@ -1018,7 +1023,7 @@
 		for(var/turf/open/T in range(target_turf, 1))
 			new /obj/effect/temp_visual/spicebloom(T)
 			for(var/mob/living/L in T.contents)
-				L.apply_damage(modified_damage, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+				L.deal_damage(modified_damage, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_SPECIAL))
 				if((L.stat < DEAD) && !(L.status_flags & GODMODE))
 					damage_dealt += modified_damage
 
@@ -1065,7 +1070,7 @@
 	Will you remember me as that name, as someone whom you cared for?"
 	special = "Use this weapon in hand to swap between forms. The sword heals some sanity on hit, the whip has higher reach, the hammer deals damage in an area, and the bat knocks back enemies."
 	icon_state = "mockery_whip"
-	force = 17
+	force = 18
 	attack_speed = 0.5
 	reach = 3
 	damtype = BLACK_DAMAGE
@@ -1131,7 +1136,7 @@
 		aoe*=justicemod
 		if(user.faction_check_mob(L) || L == target)
 			continue
-		L.apply_damage(aoe, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE))
 		new /obj/effect/temp_visual/small_smoke/halfsecond(get_turf(L))
 
 /obj/item/ego_weapon/mockery/get_clamped_volume()
@@ -1265,7 +1270,7 @@
 		aoe*=force_multiplier
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, PALE_DAMAGE, null, L.run_armor_check(null, PALE_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, PALE_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		new /obj/effect/temp_visual/small_smoke/halfsecond(get_turf(L))
 
 /obj/item/ego_weapon/shield/gasharpoon/afterattack(atom/target, mob/living/user, proximity_flag, clickparams)
@@ -1328,7 +1333,7 @@
 	for(var/mob/living/L in view(1, user))
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, PALE_DAMAGE, null, L.run_armor_check(null, PALE_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, PALE_DAMAGE, user, attack_type = (ATTACK_TYPE_COUNTER | ATTACK_TYPE_SPECIAL))
 		var/datum/status_effect/stacking/pallid_noise/P = L.has_status_effect(/datum/status_effect/stacking/pallid_noise)
 		if(!P)
 			L.apply_status_effect(STATUS_EFFECT_PALLIDNOISE)

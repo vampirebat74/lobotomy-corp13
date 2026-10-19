@@ -65,6 +65,13 @@
 			In the end, I am never able to find a way out of the forest."),
 	)
 
+	// TODO - modular work lines
+	work_start_lines = list("When humanity still huddled in caves, %ABNO appeared.")
+	middle_work_lines = list("%PERSON is surrounded by nature, even in this dark and isolated place.", "The natural world reclaims the cold steel and plastic at %ABNO's touch.",
+	"%PERSON hears birds singing, which should be impossible this deep underground.")
+	late_work_lines = list("%ABNO has no name. That is the name that humans gave it in ancient times.", "In their time of need, the old ones called for %ABNO.")
+	work_end_lines = list("When humanity has gone and passed, %ABNO will remain.", "The poetry of the earth is never dead.")
+
 	//Var Lists
 	var/list/season_stats = list(
 		"spring" = list(/datum/weather/thunderstorm, WHITE_DAMAGE, "Spring God", "Spring Deity, \"Caprice\" Panz","A bashful spirit cloaked in flower pedals.","A mischievous deity."),
@@ -138,7 +145,7 @@
 	var/special_slam_attack = null
 	var/unique_special_attack = null
 	var/attack_orientation = 1 // Used to flip certain attacks in a consistant pattern
-	var/list/zombies = list()
+	var/list/minion_list = list()
 	var/list/plants = list()
 	// Turf Tracker
 	var/list/spawned_turfs = list()
@@ -356,8 +363,8 @@
 	EndWeather()
 	for(var/obj/effect/season_turf/newturf in spawned_turfs)
 		newturf.DoDelete()
-	for(var/mob/living/simple_animal/hostile/aminion/flora_zombie/thezombie in zombies)
-		thezombie.gib()
+	for(var/mob/living/simple_animal/hostile/aminion/theminion in minion_list)
+		theminion.gib()
 	for(var/obj/structure/thorn_bomb/thebomb in plants)
 		thebomb.Wilt()
 	return ..()
@@ -480,7 +487,8 @@
 	for(var/mob/living/L in T)
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(pulse_damage, melee_damage_type)
+		L.deal_damage(pulse_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_SPECIAL))
+
 
 /mob/living/simple_animal/hostile/abnormality/seasons/proc/Finisher(mob/living/carbon/human/H) //return TRUE to prevent attacking, as attacking causes runtimes if the target is gibbed.
 	if(current_season == "spring" && H.sanity_lost) // we check for sanity, and kill em
@@ -495,7 +503,7 @@
 			C.desc = "What appears to be [H.real_name], only mangled by vines and decayed..."
 			C.gender = H.gender
 			C.faction = src.faction
-			zombies += C
+			minion_list += C
 			H.gib()
 		return TRUE
 	if(H.stat >= HARD_CRIT || H.health < 0)
@@ -588,10 +596,11 @@
 	for(var/mob/living/L in T)
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(melee_damage_upper * 2, melee_damage_type)
+		L.deal_damage(melee_damage_upper * 2, melee_damage_type, src, attack_type = (ATTACK_TYPE_MELEE))
 		been_hit = TRUE
 	if(been_hit)
-		new /mob/living/simple_animal/hostile/aminion/flytrap(T)
+		var/mob/living/simple_animal/hostile/aminion/flytrap/F = new(T)
+		minion_list += F
 
 /mob/living/simple_animal/hostile/abnormality/seasons/proc/SpringSlam()
 	slam_cooldown = world.time + slam_cooldown_time
@@ -616,7 +625,7 @@
 				continue
 			var/obj/structure/thorn_bomb/thebomb = new(get_turf(L))
 			plants += thebomb
-			L.deal_damage(slam_damage, melee_damage_type)
+			L.deal_damage(slam_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			if(ishuman(L))
 				Finisher(L)
 	SLEEP_CHECK_DEATH(3)
@@ -662,7 +671,7 @@
 			if(L in hit_list || istype(L, type))
 				continue
 			hit_list += L
-			L.deal_damage(special_attack_damage, melee_damage_type)
+			L.deal_damage(special_attack_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL))
 			new /mob/living/simple_animal/hostile/aminion/flytrap(T)
 			if(ishuman(L))
 				Finisher(L)
@@ -708,8 +717,8 @@
 		playsound(T, 'sound/weapons/fixer/generic/fire3.ogg', 30, TRUE, 3)
 		new /obj/effect/temp_visual/smash_effect(T)
 		new /obj/effect/temp_visual/fire/fast(T)
-		been_hit = HurtInTurf(T, been_hit, (melee_damage_upper * 0.5), FIRE, check_faction = TRUE)
-		been_hit = HurtInTurf(T, been_hit, melee_damage_upper, RED_DAMAGE, check_faction = TRUE)
+		been_hit = HurtInTurf(T, been_hit, (melee_damage_upper * 0.5), FIRE, check_faction = TRUE, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_RANGED))
+		been_hit = HurtInTurf(T, been_hit, melee_damage_upper, RED_DAMAGE, check_faction = TRUE, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_RANGED))
 		TryCreateSeasonTurf(T)
 	can_act = TRUE
 
@@ -731,7 +740,7 @@
 		for(var/mob/living/L in T)
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(slam_damage, melee_damage_type)
+			L.deal_damage(slam_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			if(ishuman(L))
 				Finisher(L)
 	for(var/turf/T in view(7, src))
@@ -780,7 +789,7 @@
 		playsound(src,'ModularTegustation/Tegusounds/claw/move.ogg', 50, 1)
 		for(var/turf/T2 in view(1,src))
 			new /obj/effect/temp_visual/small_smoke/halfsecond(T2)
-			var/list/new_hits = HurtInTurf(T2, special_hit_list, special_attack_damage * 2.5, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE) - special_hit_list
+			var/list/new_hits = HurtInTurf(T2, special_hit_list, special_attack_damage * 2.5, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_MELEE)) - special_hit_list
 			special_hit_list += new_hits
 			for(var/mob/living/carbon/L in new_hits)
 				L.throw_at(get_edge_target_turf(L, dir), 5, 2, gentle = TRUE)
@@ -801,7 +810,7 @@
 		R.boom_damage = slam_damage
 	for(var/turf/T in view(3,src))
 		new /obj/effect/temp_visual/fire/fast(T)
-		for(var/mob/living/carbon/L in HurtInTurf(T, list(), special_attack_damage * 1.75, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE))
+		for(var/mob/living/carbon/L in HurtInTurf(T, list(), special_attack_damage * 1.75, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_MELEE)))
 			var/atom/throw_target = get_edge_target_turf(L, get_dir(L, get_step_away(L, get_turf(src))))
 			L.throw_at(throw_target, 5, 2, gentle = TRUE)
 
@@ -814,7 +823,7 @@
 	var/bomb_damage = melee_damage_upper * 1.5
 	var/turf/target_turf
 	playsound(attacked_target, 'sound/abnormalities/seasons/old_fall_attack.ogg', 90, FALSE, 10)
-	attacked_target.deal_damage(damage_dealt * 0.5, BLACK_DAMAGE)
+	attacked_target.deal_damage(damage_dealt * 0.5, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE))
 	attacked_target.apply_dark_flame(1)
 	target_turf = get_turf(attacked_target)
 	new /obj/effect/temp_visual/seasons_wisp_death(target_turf)
@@ -830,7 +839,7 @@
 		for(var/mob/living/L in T)
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(bomb_damage, BLACK_DAMAGE)
+			L.deal_damage(bomb_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_RANGED))
 			if(ishuman(L))
 				Finisher(L)
 			L.apply_dark_flame(8)
@@ -853,7 +862,7 @@
 		for(var/mob/living/L in T)
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(slam_damage, melee_damage_type)
+			L.deal_damage(slam_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_MELEE))
 			if(ishuman(L))
 				Finisher(L)
 			L.apply_dark_flame(10)
@@ -912,25 +921,18 @@
 			continue
 		target_list += L
 	var/projectile_number = (length(target_list) + 3)
+	listclearnulls(target_list)
 	for(var/i = 1 to projectile_number)
 		if(LAZYLEN(target_list))
-			target = pick(target_list)
-		if(!target)
-			return
+			FindTarget(target_list, TRUE)
+		if(!target || QDELETED(target))
+			continue
 		var/turf/T = get_step(get_turf(src), pick(1,2,4,5,6,8,9,10))
 		if(T.density)
 			i -= 1
 			continue
-		var/obj/projectile/season_projectile/winter/weak/P
-		P = new(T)
-		P.starting = T
-		P.firer = src
-		P.fired_from = T
-		P.yo = target.y - T.y
-		P.xo = target.x - T.x
-		P.original = target
-		P.preparePixelProjectile(target, T)
-		addtimer(CALLBACK (P, TYPE_PROC_REF(/obj/projectile, fire)), i + 6)
+		new /obj/effect/projectile_delayed(T, target, src, /obj/projectile/season_projectile/winter/weak, i + 6)
+
 	playsound(get_turf(src), 'sound/abnormalities/seasons/winter_change.ogg', 15, 0, 2)
 	SLEEP_CHECK_DEATH(7)
 	playsound(get_turf(src), 'sound/abnormalities/seasons/winter_attack.ogg', 50, 0, 4)
@@ -962,7 +964,7 @@
 		for(var/mob/living/L in T)
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(slam_damage, melee_damage_type)
+			L.deal_damage(slam_damage, melee_damage_type, src, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_MELEE))
 			if(ishuman(L))
 				Finisher(L)
 	for(var/mob/living/T in view(9, src))
@@ -1093,7 +1095,7 @@
 				rotted = TRUE
 				break
 		if(!rotted)
-			L.deal_damage(1, TOX)
+			L.deal_damage(1, TOX, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 		var/obj/effect/temp_visual/alriune_attack/vfx = new(get_turf(L))
 		vfx.color = COLOR_VERY_DARK_LIME_GREEN
 		to_chat(L, span_warning("A mysterious force rapidly decays you!"))
@@ -1166,7 +1168,7 @@
 	anchored = TRUE
 	var/list/season_list = list(
 		"spring" = list("porccubus poppy", "A bed of toxic flowers."),
-		"summer" = list("volcanic rock","Some incredibly hot igneus rock."),
+		"summer" = list("volcanic rock","Some incredibly hot igneous rock."),
 		"fall" = list("swampy grass","A thick marsh, deep enough that you need to wear boots."),
 		"winter" = list("snow","A patch of snow."),
 	)
@@ -1225,6 +1227,10 @@
 				desc = "A patch of slippery ice."
 				return
 			icon_state = "snow[rand(0,6)]"
+	if(!area_affected) // Start damaging/stunning valid mob on our turf if we spawn under them.
+		return
+	for(var/mob/living/carbon/human/H in get_turf(src))
+		BumpEffect(H)
 
 /obj/effect/season_turf/Crossed(atom/movable/AM)
 	. = ..()
@@ -1267,11 +1273,11 @@
 		if(ishuman(L))
 			var/mob/living/carbon/human/H = L
 			if(current_season == "summer")
-				H.deal_damage(2, FIRE)
+				H.deal_damage(2, FIRE, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 				H.apply_lc_burn(3)
 				dealt_damage = TRUE
 			else if(current_season == "spring")
-				H.apply_damage(4, WHITE_DAMAGE, null, H.run_armor_check(null, WHITE_DAMAGE), spread_damage = FALSE)
+				H.deal_damage(4, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 	if(!dealt_damage)
 		damaging = FALSE
 		return
@@ -1462,7 +1468,7 @@
 		for(var/mob/living/L in T)
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(bomb_damage, BLACK_DAMAGE)
+			L.deal_damage(bomb_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 			L.apply_dark_flame(10)
 
 /mob/living/simple_animal/hostile/aminion/willowisp/death()
@@ -1592,7 +1598,7 @@
 			return FALSE
 		var/mob/living/simple_animal/hostile/aminion/flora_zombie/C = new(get_turf(src))
 		if(master)
-			master.zombies += C
+			master.minion_list += C
 			C.master = master
 		C.name = "[H.real_name]"//applies the target's name and adds the name to its description
 		C.icon_state = "flora_zombie"

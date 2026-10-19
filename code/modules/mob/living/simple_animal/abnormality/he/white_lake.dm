@@ -44,6 +44,11 @@
 			The ballerina turns away from you and continues her dance, ignoring you."),
 	)
 
+	work_start_lines = list("%ABNO dances a lone ballet to a tempo only she can hear.", "%ABNO is ignoring %PERSON.", "%ABNO spares %PERSON a glance and nothing more.")
+	early_work_lines = list("%ABNO seems dissastisfied by everything %PERSON does.", "%ABNO asks when another employee is coming by name, they seem happier talking about them.")
+	middle_work_lines = list("Fortitude is an impossible and foolhardy virtue, you don't need such a thing.", "%ABNO throws a disdainful look at %PERSON's hands, in spite of them being spotlessly clean.")
+	late_work_lines = list("%ABNO is exactly where she wants to be.")
+
 /mob/living/simple_animal/hostile/abnormality/whitelake/WorkChance(mob/living/carbon/human/user, chance)
 	if(get_attribute_level(user, FORTITUDE_ATTRIBUTE) >= 60)
 		var/newchance = chance - 10 //You suck, die. I hate you
@@ -79,7 +84,7 @@
 	new /obj/effect/temp_visual/whitelake(get_turf(H))
 	var/userfort = (get_attribute_level(H, FORTITUDE_ATTRIBUTE))
 	var/damage_dealt = clamp((0 + (userfort / 10)), 6, 13)//deals between 6 and 13 white damage depending on your fortitude attribute when applied.
-	H.deal_damage(damage_dealt, WHITE_DAMAGE)
+	H.deal_damage(damage_dealt, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 
 /mob/living/simple_animal/hostile/abnormality/whitelake/proc/TurnChampion(mob/living/carbon/human/H)
 	H.apply_status_effect(STATUS_EFFECT_CHAMPION)

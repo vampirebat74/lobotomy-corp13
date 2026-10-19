@@ -46,6 +46,11 @@
 		"A puppy" = list(FALSE, "It's the cutest puppy I've ever seen."),
 	)
 
+	work_start_lines = list("%ABNO is oh so fluffy and soft. It’s so sweet it could cure your depression.")
+	early_work_lines = list("Many of our employees have at least 55 different pictures of %ABNO from various angles saved on their phones.")
+	late_work_lines = list("If you dislike %ABNO, well, that’s enough reason to demote you on the spot.")
+	work_end_lines = list("I mean, sometimes we found some weird bones from what looks like a human skeleton around %ABNO, but it’s just so cute! So really, who cares?")
+
 	var/smash_damage_low = 4
 	var/smash_damage_high = 8
 	var/smash_length = 2
@@ -269,7 +274,7 @@
 	var/smash_damage = rand(smash_damage_low, smash_damage_high)
 	for(var/turf/T in area_of_effect)
 		new /obj/effect/temp_visual/smash_effect(T)
-		HurtInTurf(T, list(), smash_damage, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE)
+		HurtInTurf(T, list(), smash_damage, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	playsound(get_turf(src), 'sound/abnormalities/ppodae/bark.wav', 100, 0, 5)
 	playsound(get_turf(src), 'sound/abnormalities/ppodae/attack.wav', 50, 0, 5)
 	SLEEP_CHECK_DEATH(0.5 SECONDS)

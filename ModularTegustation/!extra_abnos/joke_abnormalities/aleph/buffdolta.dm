@@ -47,6 +47,30 @@
 		/datum/action/innate/abnormality_attack/rudolta_buff_slam,
 	)
 
+	// I just copied these over from rudolta. I don't know who made buffdolta, or if it is even funny anymore. - Coxswain
+	observation_prompt = "I heard about a man who could give you anything you want once a year. <br>Good kids have a better chance of seeing him. <br>\
+		A man who carries giant sack on his back. <br>A man who can go anywhere in the world with his reindeer-pulled sled. <br>\
+		Alex got a present. <br>Even though he was a naughty kid. <br>It was unfair. <br>I could not accept it. <br>The next Christmas, I went to Alex's. <br>\
+		If that man comes only for Alex this time again, I will ask him why had he not come to me. <br>\
+		That night, when everyone was sleeping. <br>I waited for the man, sitting next to sleeping Alex. <br>\
+		Sometimes, for someone, an absurd fairy tale is a silver lining of hope. <br>When I met Santa, I imagined dismembering him. <br>... <br>\
+		In front of me is Santa. <br>My ideal. <br>People don't call it Santa. <br>Something is twitching inside of that sack. I......"
+	observation_choices = list(
+		"Did not open the sack" = list(TRUE, "Inside of the sack is a desire. <br>\
+			A hope that I've been waiting for since when I was very young. <br>I never opened the sack. <br>Did your wish come true?"),
+		"Opened the sack" = list(FALSE, "There was something that I have been longing for my entire life. <br>\
+			Like Pandora's Box, it will never go back into the sack."),
+	)
+
+	work_start_lines = list("When the rusty sleigh bells are ajingle, Christmas begins.",
+	"With a displaced jaw and lifeless tongue, words are swallowed instead of sung.", "Where is Santa for those unhappy?")
+	early_work_lines = list("The colorful lights were as bright as Christmas, and as dark as every child's nightmare and grimace.",
+	"The sewing looks crude, but the effort put into making it was nothing but obsessively shrewd.")
+	middle_work_lines = list("Christmas, oh the hideous carnival. Every Christmas, I was filled with the urge to pluck out the tongues of those who sing carols.",
+	"With my infinite hatred, I give you this gift.")
+	late_work_lines = list("%ABNO shows no sign of life, yet it moves nonetheless. This may be due to the energy it produces.",
+	"%ABNO roams around without purpose. It wants to give away its pile of gifts.")
+
 	var/can_act = TRUE
 	// Onrush vars
 	var/onrush_cooldown
@@ -163,7 +187,7 @@
 		onrush_hit |= target
 	var/turf/thrownat = get_ranged_target_turf_direct(src, target, 15, rand(-30, 30))
 	target.throw_at(thrownat, 8, 2, src, TRUE, force = MOVE_FORCE_OVERPOWERING, gentle = FALSE)
-	target.deal_damage(onrush_damage, RED_DAMAGE)
+	target.deal_damage(onrush_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	new /obj/effect/temp_visual/smash_effect(get_turf(target))
 	shake_camera(target, 2, 5)
 
@@ -221,7 +245,7 @@
 		if(TF.density)
 			continue
 		new /obj/effect/temp_visual/small_smoke/halfsecond(TF)
-		been_hit = HurtInTurf(TF, been_hit, slam_damage, RED_DAMAGE, null, TRUE, FALSE, TRUE, TRUE)
+		been_hit = HurtInTurf(TF, been_hit, slam_damage, RED_DAMAGE, null, TRUE, FALSE, TRUE, TRUE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	for(var/mob/living/L in been_hit)
 		if(L.health < 0)
 			L.gib()

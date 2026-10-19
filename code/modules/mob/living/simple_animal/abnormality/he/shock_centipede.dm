@@ -68,6 +68,12 @@
 			The electrified water fell right on your head."),
 	)
 
+	work_start_lines = list("\"This centipede is capable of discharging a high voltage\", says a sign inside %ABNO's cell")
+	early_work_lines = list("\"Apply stimulation and pain to the centipede to increase the discharge intensity\", so says the warning above the console.")
+	middle_work_lines = list("%PERSON feels nothing watching the %ABNO writhe around.", "%ABNO almost looks like its dancing, but it doesn't seem to be out of enjoyment.")
+	work_end_lines = list("For the sake of reaching quota in a timely manner, %ABNO must suffer on our behalf.",
+	"%ABNO's treatment may seem cruel, but it is in no more suffering than any other abnormality.")
+
 // Work vars
 	var/bonus_pe = 6
 	var/repression_override = 50
@@ -305,7 +311,7 @@
 	for(var/mob/living/L in view(4, src))
 		if(faction_check_mob(L))
 			continue
-		L.apply_damage(coil_discharge_aoe_damage, coil_discharge_aoe_damagetype, null, L.run_armor_check(null, coil_discharge_aoe_damagetype), spread_damage = TRUE)
+		L.deal_damage(coil_discharge_aoe_damage, coil_discharge_aoe_damagetype, src, attack_type = (ATTACK_TYPE_SPECIAL))
 		L.Stun(coil_discharge_aoe_stun_duration)
 		count ++
 	playsound(get_turf(src), 'sound/abnormalities/kqe/hitsound2.ogg', 100, 0, 8)
@@ -383,14 +389,14 @@
 			if(TF.density)
 				continue
 			new /obj/effect/temp_visual/smash_effect(TF)
-			been_hit = HurtInTurf(TF, been_hit, tailattack_damage, tailattack_damagetype, null, null, TRUE, FALSE, TRUE, TRUE)
+			been_hit = HurtInTurf(TF, been_hit, tailattack_damage, tailattack_damagetype, null, null, TRUE, FALSE, TRUE, TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	AdjustCharge(length(been_hit) * tailattack_charge_per_target)
 	playsound(get_turf(src), 'sound/weapons/fixer/generic/energyfinisher1.ogg', 75, 1)
 	can_act = TRUE
 
 // Object effect
 /obj/effect/temp_visual/shock_shield
-	name = "shock_sheild"
+	name = "shock shield"
 	desc = "A shimmering forcefield protecting the shock centipede."
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "shield"

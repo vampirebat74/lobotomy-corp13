@@ -45,6 +45,10 @@
 			<br>Then she melts away, for this was your dream."),
 	)
 
+	work_start_lines = list("She was told that it would feel like no time at all.")
+	early_work_lines = list("Stasis technology is more reliable these days, but accidents still happen.")
+	work_end_lines = list("Is she still dreaming of the world she went to sleep waiting for, or, does she now dream of what she left behind?")
+
 	var/list/sleeplines = list(
 		"Hello...",
 		"I am reaching you from beyond the veil...",
@@ -127,7 +131,7 @@
 		user.drowsyness += 30
 		user.Sleeping(30 SECONDS) // Won't get any info, but you can listen for any breaches for 30 seconds
 		return FALSE
-	return TRUE
+	return ..()
 
 /mob/living/simple_animal/hostile/abnormality/oracle/proc/OnAbnoBreach(datum/source, mob/living/simple_animal/hostile/abnormality/abno)
 	SIGNAL_HANDLER
@@ -166,7 +170,7 @@
 		if(faction_check_mob(L))
 			continue
 		to_chat(L, span_userdanger("Visions of a horrible future flash before your eyes!"))
-		L.deal_damage((50 - get_dist(src, L)), WHITE_DAMAGE)
+		L.deal_damage((50 - get_dist(src, L)), WHITE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 	qdel(src)
 
 /mob/living/simple_animal/hostile/abnormality/oracle/proc/SpecialDreams(datum/oracle_dream/chosen_dream, mob/living/carbon/human/dreamer)

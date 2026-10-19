@@ -54,6 +54,10 @@
 			I keep watching and listening. A more attentive hearing reveals that the sounds have a rhythm. Perhaps there is delight to be found in it."),
 	)
 
+	work_start_lines = list("%PERSON recognizes the apparel of company L's employees.", "%PERSON wonders why another employee is in this cell and thinks a mistake has been made.")
+	early_work_lines = list("\"Unregulated ingestion of Enkephalin may cause a wide range of unverified psychopathological symptoms.\" - Employee handbook.")
+	work_end_lines = list("Who'll spare a thought for the employees of the failed branches? Trapped and buried alive.")
+
 /mob/living/simple_animal/hostile/abnormality/forsaken_employee/FailureEffect(mob/living/carbon/human/user, work_type, pe, work_time, canceled)
 	. = ..()
 	datum_reference.qliphoth_change(-1)
@@ -92,10 +96,18 @@
 	random_icon_states = list("acid_greyscale")
 	color = "#20f8ac"
 	duration = 30 SECONDS
+	safe_types = list(
+	/mob/living/simple_animal/hostile/abnormality/forsaken_employee,
+	)
+	human_safe = FALSE
+	applied_status = null
+	damage_dealt = 1
+	damage_delay = 10
+	damage_type = WHITE_DAMAGE
 
 /obj/effect/decal/cleanable/wrath_acid/enkephalin/Crossed(atom/movable/AM)
 	if(!ishuman(AM))
 		return FALSE
 	var/mob/living/carbon/human/H = AM
-	H.apply_damage(1, WHITE_DAMAGE, null, H.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+	H.deal_damage(1, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 	. = ..()

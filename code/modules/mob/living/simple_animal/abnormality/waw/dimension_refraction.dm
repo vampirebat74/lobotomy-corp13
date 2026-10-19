@@ -51,6 +51,9 @@
 		"Exit the containment unit" = list(FALSE, "The manual says to leave the chamber immediately if the cup's condition becomes violent. <br>As I leave, the water falls still."),
 	)
 
+	work_start_lines = list("Many employees are dying under the cognition of %ABNO.")
+	middle_work_lines = list("The longer %PERSON stays, the worse the situation becomes.")
+
 	var/cooldown_time = 2
 	var/aoe_damage = 10
 
@@ -58,7 +61,7 @@
 	for(var/mob/living/L in livinginview(1, src))
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(aoe_damage, RED_DAMAGE)
+		L.deal_damage(aoe_damage, RED_DAMAGE, flags = (DAMAGE_UNTRACKABLE), attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
 	addtimer(CALLBACK(src, PROC_REF(Melter)), cooldown_time)
 

@@ -42,7 +42,6 @@
 		/datum/ego_datum/armor/skinprophet,
 	)
 	gift_type = /datum/ego_gifts/visions
-	can_spawn = FALSE // Normally doesn't appear
 	abnormality_origin = ABNORMALITY_ORIGIN_LIMBUS
 	chem_type = /datum/reagent/abnormality/sin/wrath
 
@@ -64,6 +63,11 @@
 		"Peek at the book" = list(FALSE, "!@)(!@&)&*%(%@!@#*(#)*(%&!@#$ <br>\
 			@$*@)$ ? <br> @#$!!@#* ! <br> @*()!%&$(^!!!!@&(@)"),
 	)
+
+	work_start_lines = list("The sound of quill on paper scratching fills the air as %ABNO's hands write away.", "%ABNO's focus remains on the tome infront of it as %PERSON enters the Containment Unit.")
+	early_work_lines = list("Nothing can distract %ABNO from its task, the prophecies must be recorded.", "@$*@)$ ?", "The people walking in darkness have seen a great light.", "Death, destruction, devastation - portents of doom await us all.")
+	late_work_lines = list("@#$!!@#* !", "An ineffable terror would fill %PERSON's heart if they knew what the prophecies foretold.", "Even if the lights were to fail and the candles were to be snuffed out, %ABNO would not be distracted from its self-appointed task.")
+	work_end_lines = list("For those living in the land of deep darkness, a light has dawned.")
 
 	var/list/speak_list = list(
 		"!@)(!@&)&*%(%@!@#*(#)*(%&!@#$",
@@ -119,7 +123,7 @@
 /mob/living/simple_animal/hostile/abnormality/skin_prophet/AttemptWork(mob/living/carbon/human/user, work_type)
 	..()
 	HandleCandles()
-	return TRUE
+	return ..()
 
 /mob/living/simple_animal/hostile/abnormality/skin_prophet/WorkChance(mob/living/carbon/human/user, chance, work_type)//set the new work chances
 	. = chance // Set default Return to chance
@@ -193,6 +197,20 @@
 		C.LightUp()
 		++lit_candles
 
+/mob/living/simple_animal/hostile/abnormality/skin_prophet/bullet_act(obj/projectile/Proj, def_zone, piercing_hit = FALSE)
+	if(istype(Proj, /obj/projectile/skin_fire))
+		return
+	. = ..()
+
+/mob/living/simple_animal/hostile/abnormality/skin_prophet/PostDamageReaction(damage_amount, damage_type, source, attack_type)
+	. = ..()
+	if(. <= 0 || !isliving(source) || !length(breach_candles)) // Only execute the rest of the code if we were provided with a source for it and we have candles up
+		return
+	if((attack_type & ATTACK_TYPE_MELEE)) //Do its melee counter
+		Counter(source)
+		return
+	FireProjectile(source)
+
 /mob/living/simple_animal/hostile/abnormality/skin_prophet/proc/FireProjectile(atom/target)
 	var/obj/projectile/skin_fire/S = new /obj/projectile/skin_fire(loc)
 	S.fired_from = src
@@ -200,22 +218,6 @@
 	playsound(src, 'sound/abnormalities/skinprophet/Skin_Candle.ogg', 100, TRUE)
 	S.preparePixelProjectile(target, src)
 	S.fire()
-
-/mob/living/simple_animal/hostile/abnormality/skin_prophet/bullet_act(obj/projectile/Proj, def_zone, piercing_hit = FALSE)
-	if(!length(breach_candles))
-		return ..()
-	if(istype(Proj, /obj/projectile/skin_fire))
-		return
-	..()
-	if(Proj.firer)
-		FireProjectile(Proj.firer)
-
-/mob/living/simple_animal/hostile/abnormality/skin_prophet/attackby(obj/item/I, mob/living/user, params)
-	if(!length(breach_candles))
-		return ..()
-	..()
-	if(user)
-		Counter(user)
 
 //***Work-related procs***
 /mob/living/simple_animal/hostile/abnormality/skin_prophet/proc/ExtinguishCandles()
@@ -239,7 +241,7 @@
 		playsound(src, 'sound/abnormalities/skinprophet/Skin_Hit.ogg', 75, 0, 3)
 	for(var/turf/T in view(2, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		HurtInTurf(T, list(), melee_damage_upper, RED_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE, hurt_structure = TRUE)
+		HurtInTurf(T, list(), melee_damage_upper, RED_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_COUNTER))
 
 /mob/living/simple_animal/hostile/abnormality/skin_prophet/proc/WriteAttack(atom/target)
 	playsound(src, 'sound/abnormalities/skinprophet/Skin_Write.ogg', 75, 0, 3)
@@ -247,7 +249,7 @@
 	for (var/turf/T in range(target_turf, 1))
 		new /obj/effect/temp_visual/cult/sparks(T)
 		spawn(15)
-			HurtInTurf(T, list(), melee_damage_lower, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE)
+			HurtInTurf(T, list(), melee_damage_lower, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE))
 			new /obj/effect/temp_visual/smash_effect(T)
 	SLEEP_CHECK_DEATH(1.5 SECONDS)
 	playsound(target_turf, 'sound/abnormalities/skinprophet/Skin_Hit.ogg', 75, 0, 3)

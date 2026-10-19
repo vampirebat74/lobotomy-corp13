@@ -66,6 +66,15 @@ It has now been over four months. Now we get her for real. -Coxswain
 			This is my struggle."),
 	)
 
+	work_start_lines = list("%ABNO is waiting for a contract as always. She's waiting for the smell of fresh blood.",
+	"\"Tell me if you ever see that furry bastard. The price of my handiwork will be completely free the day I get to chop that damned thing's head off comes.\"",
+	"As it turns out, %ABNO is much more capable at suppressing Abnormalities than most of our employees are.")
+	early_work_lines = list("%ABNO tends to spend the entire day grinding her axe if nothing important occurs.",
+	"%ABNO asked for someplace to practice her marksmanship, but the staff strongly rejected it.")
+	middle_work_lines = list("When %ABNO engages in combat, you'll be able to see her numerous small wounds and large scars between the fluttering of her hood.",
+	"Many of our employees wonder how %ABNO got her scars; few and far between are brave enough to ask.")
+	late_work_lines = list("Everything ends when she finally faces the wolf.", "The fight has been ongoing for a long, long time. Her disgust for the wolf deepens by the second.")
+
 	/*
 	Red's targeting logic
 
@@ -221,12 +230,15 @@ It has now been over four months. Now we get her for real. -Coxswain
 	addtimer(CALLBACK(src, PROC_REF(EndEvade)), 20)
 	return
 
-/mob/living/simple_animal/hostile/abnormality/red_hood/apply_damage(damage = 0,damagetype = RED_DAMAGE, def_zone = null, blocked = FALSE, forced = FALSE, spread_damage = FALSE, wound_bonus = 0, bare_wound_bonus = 0, sharpness = SHARP_NONE, white_healable = FALSE)
+/mob/living/simple_animal/hostile/abnormality/red_hood/PreDamageReaction(damage_amount, damage_type, source, attack_type)
 	if(evading_attack)
 		evading_attack = FALSE
 		EndEvade()
 		return FALSE
-	..()
+	return TRUE
+
+/mob/living/simple_animal/hostile/abnormality/red_hood/PostDamageReaction(damage_amount, damage_type, source, attack_type)
+	. = ..()
 	if(health > (maxHealth * 0.8) || !priority_target)
 		return
 	if(red_rage < 1 && target_priority > 2)

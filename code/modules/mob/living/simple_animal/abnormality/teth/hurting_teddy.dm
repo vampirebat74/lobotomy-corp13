@@ -67,6 +67,10 @@
 			After a few short moments, the teddy bear seems satisfied."),
 	)
 
+	work_start_lines = list("The bloodstains decorating %ABNO are a telling sign of all the time it spent in pain.")
+	middle_work_lines = list("A child's toy exists for the sake of the child - to be abused or played with, it's all the same to it.", "The stake through %ABNO's heart is proof that it was cared for - to be ignored, forgotten, is the worst fate for a beloved toy.")
+	work_end_lines = list("Perhaps it's unable to feel pain.")
+
 	var/bearfriended //the one who can work on it safely
 	var/mob/living/carbon/human/hug_victim = null
 	var/release_threshold = 20 //Total raw damage needed to break a player out of a grab (from any source)
@@ -176,9 +180,9 @@
 		ReleaseHug()
 		return
 	do_attack_animation(get_step(src, dir), no_effect = TRUE)
-	hug_victim.deal_damage(hug_damage, BLACK_DAMAGE)
+	hug_victim.deal_damage(hug_damage, BLACK_DAMAGE, src)
 	new /obj/effect/temp_visual/smash1(get_turf(src))
-	hug_victim.deal_damage(crush_damage, BRUTE)
+	hug_victim.deal_damage(crush_damage, BRUTE, src)
 	hug_victim.Immobilize(10)
 	playsound(get_turf(src), 'sound/abnormalities/sweethome/smash.ogg', 50, 1)
 	switch(count)
@@ -188,10 +192,10 @@
 		if(4)  //apply more damage
 			playsound(get_turf(src), 'sound/effects/wounds/crackandbleed.ogg', 200, 0, 7)
 			to_chat(hug_victim, span_userdanger("It hurts so much!"))
-			hug_victim.deal_damage(crush_damage, BRUTE)
+			hug_victim.deal_damage(crush_damage, BRUTE, src)
 		else      //Apply ramping damage
 			playsound(get_turf(src), 'sound/effects/wounds/crackandbleed.ogg', 200, 0, 7)
-			hug_victim.deal_damage((crush_damage + count), BRUTE)
+			hug_victim.deal_damage((crush_damage + count), BRUTE, src)
 	count += 1
 	if(hug_victim.sanity_lost)
 		hug_victim.Stun(10)
@@ -203,10 +207,10 @@
 		hug_victim = null
 		can_act = TRUE
 
-/mob/living/simple_animal/hostile/abnormality/hurting_teddy/apply_damage(damage, damagetype, def_zone, blocked, forced, spread_damage, wound_bonus, bare_wound_bonus, sharpness, white_healable)
+/mob/living/simple_animal/hostile/abnormality/hurting_teddy/PostDamageReaction(damage_amount, damage_type, source, attack_type)
 	. = ..()
 	if(hug_victim)
-		release_damage = clamp (release_damage + damage, 0, release_threshold)
+		release_damage = clamp (release_damage + ., 0, release_threshold)
 	if(release_damage >= release_threshold)
 		ReleaseHug()
 

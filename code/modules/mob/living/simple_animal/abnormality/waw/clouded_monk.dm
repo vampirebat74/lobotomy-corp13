@@ -51,6 +51,12 @@
 		"I am no longer a monk" = list(TRUE, "A demon shall never reach Heaven."),
 	)
 
+	work_start_lines = list("%PERSON gazes at %ABNO, who sits peacefully in meditation.")
+	early_work_lines = list("%ABNO never stops practicing self-discipline, looking far into serenity and yearning to return to the way of righteousness he lost in his living years.")
+	middle_work_lines = list("%ABNO’s myriad anguish, which he once so tragically failed to control, fills the Containment Unit.")
+	late_work_lines = list("%ABNO is desperately holding the shattered pieces of a japamala in his hands.")
+	work_end_lines = list("What is this? That which I cannot gain through leaving, and that I leave by gaining.")
+
 	var/datum/looping_sound/cloudedmonk_ambience/soundloop
 	var/charging = FALSE
 	var/revving_charge = FALSE
@@ -245,7 +251,7 @@
 			to_chat(L, span_userdanger("[src] slams you!"))
 			var/turf/LT = get_turf(L)
 			new /obj/effect/temp_visual/kinetic_blast(LT)
-			L.apply_damage(slam_damage,RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			L.deal_damage(slam_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			playsound(L, 'sound/creatures/lc13/lovetown/slam.ogg', 75, 1)
 
 /mob/living/simple_animal/hostile/abnormality/clouded_monk/proc/ResetCharge()
@@ -266,7 +272,7 @@
 				shake_camera(src, 2, 3)
 				if(ishuman(L))
 					var/mob/living/carbon/human/H = A
-					H.deal_damage(charge_damage, RED_DAMAGE)
+					H.deal_damage(charge_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 					if(H.health < 0)
 						H.gib()
 						adjustBruteLoss(-heal_amount)

@@ -55,6 +55,9 @@
 		"Cut his bindings" = list(FALSE, "I cut the man free and he thanks me profusely before he speeds down the stairs. <br>He won't make it. <br>I close my eyes and accept the end."),
 	)
 
+	work_start_lines = list("%PERSON hesitantly enters the Containment Unit with a sense of foreboding.", "The stone mask of the %ABNO brings about unease in %PERSON.")
+	middle_work_lines = list("The purpose of %ABNO is to bring about the apocalypse.")
+
 	var/player_count
 	var/other_works_maximum
 	var/other_works = 0
@@ -266,7 +269,7 @@
 						A.datum_reference.qliphoth_change(-1)
 					if(faction_check_mob(H))
 						continue
-					H.deal_damage(aflame_damage, BLACK_DAMAGE)
+					H.deal_damage(aflame_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 					if(H.stat >= SOFT_CRIT || H.health < 0)
 						H.fire_stacks += 1
 						H.IgniteMob()//unforunately this fire isn' blue.
@@ -277,7 +280,7 @@
 	for(var/mob/living/L in livinginview(10, src))
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(pulse_damage, RED_DAMAGE)
+		L.deal_damage(pulse_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 /mob/living/simple_animal/hostile/abnormality/doomsday_calendar/proc/EnableFire()
 	if(current_phase_num <= 1)

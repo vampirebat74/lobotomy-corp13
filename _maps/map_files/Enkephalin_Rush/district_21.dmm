@@ -2099,7 +2099,7 @@
 /turf/open/floor/mineral/titanium/tiled/blue,
 /area/city)
 "us" = (
-/turf/closed/indestructible/reinforced/old,
+/turf/closed/indestructible/reinforced,
 /area/department_main/information)
 "ut" = (
 /obj/machinery/light/broken{

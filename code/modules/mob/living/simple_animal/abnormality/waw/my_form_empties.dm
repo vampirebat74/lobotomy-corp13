@@ -52,6 +52,10 @@
 			Though the tone of its mantra remains consistent, you knew its chants are imbued with a curse.")
 	)
 
+	work_start_lines = list("%PERSON is nervous about entering the Containment Unit.","%PERSON is unsettled by the sound that %ABNO makes.")
+	early_work_lines = list("While the face carved on %ABNO is calm and serene, the flesh underneath is an unsettling sight.")
+	late_work_lines = list("While %ABNO occasionally makes symbolic gestures with its left hand, the meaning is lost on %PERSON.")
+
 	var/anatman_state = FALSE
 	var/praying = FALSE
 
@@ -152,7 +156,7 @@
 	SLEEP_CHECK_DEATH(10)
 	for(var/turf/T in view(staff_range, get_turf(staff)))
 		new /obj/effect/temp_visual/smash_effect(T)
-		been_hit = HurtInTurf(T, been_hit, staff_damage, WHITE_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE, mech_damage = staff_damage)
+		been_hit = HurtInTurf(T, been_hit, staff_damage, WHITE_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE, mech_damage = staff_damage, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		for(var/mob/living/L in T)
 			ApplyKarma(L, 15)
 	animate(staff, transform = turn(matrix(), 15) ,time = 2)
@@ -166,7 +170,7 @@
 			continue
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(pulse_damage, WHITE_DAMAGE)//apply karma here
+		L.deal_damage(pulse_damage, WHITE_DAMAGE, src)//apply karma here
 		ApplyKarma(L, 5)
 		extended_flash_color(L, flash_color = "#FDAE8B", flash_time = 1,maintain_time = 115)
 		if(!ishuman(L))

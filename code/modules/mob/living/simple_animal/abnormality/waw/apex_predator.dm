@@ -63,6 +63,11 @@
 			You smile as you pull out your baton."),
 	)
 
+	work_start_lines = list("%ABNO hasn’t moved a single inch. It feels no desire to.")
+	early_work_lines = list("%PERSON feels like if they blink, something very bad will happen.")
+	middle_work_lines = list("No matter how many times the cell is cleaned, the smell of blood will always linger.")
+	work_end_lines = list("%PERSON wants to exit %ABNO’s cell as soon as humanly possible.")
+
 	var/revealed = TRUE
 	var/can_act = TRUE
 	var/backstab_damage = 60
@@ -106,7 +111,7 @@
 	if(user.health != user.maxHealth)
 		work_damage_upper = 8
 		work_damage_lower = 6
-	return TRUE
+	return ..()
 
 /mob/living/simple_animal/hostile/abnormality/apex_predator/PostWorkEffect(mob/living/carbon/human/user, work_type, pe, work_time)
 	if(user.health < 0)
@@ -137,7 +142,7 @@
 				var/mob/living/V = attacked_target
 				visible_message(span_danger("The [src] rips out [attacked_target]'s guts!"))
 				new /obj/effect/gibspawner/generic(get_turf(V))
-				V.deal_damage(backstab_damage, RED_DAMAGE)
+				V.deal_damage(backstab_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			//Backstab succeeds from any one of 3 tiles behind a mecha, backstab from directly behind gets boosted by mecha directional armor weakness
 			else if(ismecha(attacked_target))
 				var/relative_angle = abs(dir2angle(attacked_target.dir) - dir2angle(get_dir(attacked_target, src)))
@@ -216,7 +221,7 @@
 	icon_state = "apex_crouch"
 	playsound(src, 'sound/effects/meteorimpact.ogg', 300, FALSE, 9)
 	for(var/turf/T in range(1, src))
-		HurtInTurf(T, list(), jump_damage, RED_DAMAGE, null, TRUE, FALSE, TRUE)
+		HurtInTurf(T, list(), jump_damage, RED_DAMAGE, null, TRUE, FALSE, TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		new /obj/effect/temp_visual/kinetic_blast(T)
 	addtimer(CALLBACK(src, PROC_REF(Reset)), 12)
 

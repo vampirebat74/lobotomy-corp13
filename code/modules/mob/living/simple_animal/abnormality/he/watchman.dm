@@ -53,6 +53,12 @@
 		Numerous hooks, claws, and sickles bite into you all at once. <br>\ Now you will know why you fear the night."),
 	)
 
+	work_start_lines = list("Natureless creatures roam the night, you should find shelter.", "%ABNO's cell is perpetually gloomy.")
+	early_work_lines = list("Despite %ABNO's large lantern holding a lit flame - it emits no light, nor warmth.", "%PERSON declines %ABNO's offer of guiding them home.",
+	"When Night falls in the Backstreets...")
+	late_work_lines = list("Humanity has always feared the dark, the denizens of the City know exactly what the night holds.",
+	"I pray the beings of the night return to their dens soon...", "%ABNO reminds %PERSON to be home before 3:13 A.M.")
+
 	// Speech Lines
 	speak_chance = 4
 	var/speak_normal = list(
@@ -186,12 +192,12 @@
 		return
 	if(stacks >= 15)
 		var/damage_dealt = (stacks / 2) // ramping 8 - 15 damage
-		owner.deal_damage(damage_dealt, BLACK_DAMAGE)
+		owner.deal_damage(damage_dealt, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT | ATTACK_TYPE_STATUS))
 		var/thesound = pick('sound/hallucinations/growl1.ogg','sound/hallucinations/growl2.ogg', 'sound/hallucinations/growl3.ogg',)
 		owner.playsound_local(get_turf(src), thesound, 50, TRUE)
 		return
 	if(stacks >= 10)
-		owner.deal_damage(4, BLACK_DAMAGE)
+		owner.deal_damage(4, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT | ATTACK_TYPE_STATUS))
 		if(!played_warning_sound)
 			var/thesound = pick('sound/hallucinations/turn_around1.ogg','sound/hallucinations/turn_around2.ogg',)
 			owner.playsound_local(get_turf(src), thesound, 50, TRUE)

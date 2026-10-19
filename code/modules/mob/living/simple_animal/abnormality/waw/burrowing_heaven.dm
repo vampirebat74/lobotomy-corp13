@@ -49,6 +49,9 @@
 		"Ignore it" = list(FALSE, "If you can't see it, you can't reach it."),
 	)
 
+	work_start_lines = list("%ABNO lives inside the target's eyes.")
+	middle_work_lines = list("%ABNO grows thorns aimed for heaven inside %PERSON's vision.")
+
 	var/teleport_cooldown
 	var/teleport_cooldown_time = 5 SECONDS
 	var/gaze_damage = 150
@@ -168,7 +171,7 @@
 	for(var/mob/living/carbon/human/L in oview(8,src))
 		if(L.stat != DEAD)
 			if(!is_A_facing_B(L,src))
-				L.apply_damage(gaze_damage,BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+				L.deal_damage(gaze_damage,BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 				hit_target = TRUE
 	if(hit_target)
 		var/chosen_sound = pick(scream_sounds)

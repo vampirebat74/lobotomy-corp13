@@ -9,8 +9,8 @@
 	base_pixel_x = -8
 	pixel_x = -8
 	faction = list("violet_ordeal")
-	maxHealth = 80
-	health = 80
+	maxHealth = 190
+	health = 190
 	speed = 4
 	move_to_delay = 5
 	butcher_results = list(/obj/item/food/meat/slab/fruit = 1)
@@ -21,7 +21,7 @@
 
 /mob/living/simple_animal/hostile/ordeal/violet_fruit/Initialize()
 	. = ..()
-	addtimer(CALLBACK(src, PROC_REF(ReleaseDeathGas)), rand(60 SECONDS, 65 SECONDS))
+	addtimer(CALLBACK(src, PROC_REF(ReleaseDeathGas)), rand(60 SECONDS, 70 SECONDS))
 
 /mob/living/simple_animal/hostile/ordeal/violet_fruit/Found(atom/A)
 	if(isliving(A))
@@ -74,7 +74,7 @@
 	for(var/mob/living/L in view(2, src))
 		if(!faction_check_mob(L))
 			new /obj/effect/temp_visual/revenant(get_turf(L))
-			L.apply_damage(2, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE))
+			L.deal_damage(2, BLACK_DAMAGE, src)
 	return TRUE
 
 /mob/living/simple_animal/hostile/ordeal/violet_fruit/proc/ReleaseDeathGas()
@@ -91,7 +91,7 @@
 	for(var/mob/living/L in livinginrange(15, target_c))
 		if(faction_check_mob(L))
 			continue
-		L.apply_damage(12, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE))
+		L.deal_damage(12, WHITE_DAMAGE)
 	for(var/obj/machinery/computer/abnormality/A in urange(15, target_c))
 		if(A.can_meltdown && !A.meltdown && A.datum_reference && A.datum_reference.current && A.datum_reference.qliphoth_meter)
 			A.datum_reference.qliphoth_change(pick(-999))

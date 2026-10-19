@@ -44,6 +44,13 @@
 			It didn't mean anything. <br>In the corner of the room, I saw the reaper bow his head in apology."),
 	)
 
+	work_start_lines = list("%ABNO reaches out her hand but %PERSON knows they mustn't return a meaningless gesture like that.")
+	early_work_lines = list("The darkness in %ABNO's cell is oppressive.", "Nobody bothers replacing the lights in %ABNO's cell anymore.", "She was so pale at the end...")
+	middle_work_lines = list("%PERSON recalls someone they could not be there for's passing.", "%ABNO looks too young to have time to live.")
+	late_work_lines = list("%PERSON could swear they saw the shadow twitch towards them.", "I held her hand, but it didn't mean anything...")
+	work_end_lines = list("In truth, the reaper and the girl are both one and the same.", "Everyone gets a lifetime, no more - no less.",
+	"%ABNO waves goodbye at %PERSON, the shadow behind her bows its head slightly.")
+
 	var/meltdown_cooldown //no spamming the meltdown effect
 	var/meltdown_cooldown_time = 15 SECONDS
 
@@ -94,7 +101,7 @@
 	if(QDELETED(user))
 		return
 	to_chat(user, span_userdanger("[src] stabs you!"))
-	user.deal_damage(3000, PALE_DAMAGE)
+	user.deal_damage(3000, PALE_DAMAGE, src)
 	playsound(user, 'sound/weapons/fixer/generic/nail1.ogg', 100, FALSE, 4)
 	return
 
@@ -196,7 +203,7 @@
 			B.on = 1
 			B.break_light_tube()
 		for(var/mob/living/L in T)
-			L.deal_damage(10, PALE_DAMAGE)
+			L.deal_damage(10, PALE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 			if(ishuman(L) && L.health < 0)
 				var/mob/living/carbon/human/H = L
 				H.Drain()

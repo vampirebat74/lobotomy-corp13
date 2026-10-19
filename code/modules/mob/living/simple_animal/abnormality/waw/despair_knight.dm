@@ -7,6 +7,7 @@
 	icon_state = "despair"
 	icon_living = "despair"
 	icon_dead = "despair_dead"
+	core_icon = "despair_egg"
 	portrait = "despair_knight"
 	pixel_x = -8
 	base_pixel_x = -8
@@ -58,12 +59,15 @@
 		"Accept her blessing" = list(FALSE, "Thank you, though I am but a pitiful knight, I still yearn to protect, if I can't protect others, I may as well disappear..."),
 	)
 
+	work_start_lines = list("%ABNO occasionally sheds helpless tears while the work goes on, not saying anything to %PERSON.")
+	middle_work_lines = list("%ABNO still dwells in her past glories, just like her sisters.")
+
 	var/mob/living/carbon/human/blessed_human = null
 	var/teleport_cooldown
 	var/teleport_cooldown_time = 20 SECONDS
 	var/swords = 0
-	var/nihil_present = FALSE
 	var/can_act = TRUE
+	var/special_breach = FALSE
 
 /mob/living/simple_animal/hostile/abnormality/despair_knight/ZeroQliphoth(mob/living/carbon/human/user)
 	switch(swords)
@@ -100,19 +104,7 @@
 		if(T.density)
 			i -= 1
 			continue
-		var/obj/projectile/despair_rapier/P
-		if(nihil_present)
-			P = new /obj/projectile/despair_rapier/justice(T)
-		else
-			P = new(T)
-		P.starting = T
-		P.firer = src
-		P.fired_from = T
-		P.yo = target.y - T.y
-		P.xo = target.x - T.x
-		P.original = target
-		P.preparePixelProjectile(target, T)
-		addtimer(CALLBACK (P, TYPE_PROC_REF(/obj/projectile, fire)), 3)
+		new /obj/effect/projectile_delayed(T, target, src, /obj/projectile/despair_rapier, 3)
 	SLEEP_CHECK_DEATH(3)
 	playsound(get_turf(src), 'sound/abnormalities/despairknight/attack.ogg', 50, 0, 4)
 	return
@@ -127,8 +119,17 @@
 /mob/living/simple_animal/hostile/abnormality/despair_knight/death(gibbed)
 	density = FALSE
 	animate(src, alpha = 0, time = 5 SECONDS)
-	QDEL_IN(src, 5 SECONDS)
+	addtimer(CALLBACK(src, PROC_REF(CoreAnimation)), 5 SECONDS)
+	QDEL_IN(src, 10 SECONDS)
 	..()
+
+/mob/living/simple_animal/hostile/abnormality/despair_knight/proc/CoreAnimation()
+	pixel_x = -16
+	base_pixel_x = -16
+	icon = 'ModularTegustation/Teguicons/abno_cores/waw.dmi'
+	icon_state = core_icon
+	animate(src, alpha = 255, time = 0)
+	return TRUE
 
 /mob/living/simple_animal/hostile/abnormality/despair_knight/proc/BlessedDeath(datum/source, gibbed)
 	SIGNAL_HANDLER
@@ -141,9 +142,6 @@
 	blessed_human.physiology.pale_mod /= 2
 	blessed_human.adjust_attribute_bonus(TEMPERANCE_ATTRIBUTE, 50)
 	blessed_human = null
-	if(nihil_present) //We die during a nihil suppression if our champion dies
-		death()
-		return TRUE
 	BreachEffect()
 	return TRUE
 
@@ -152,6 +150,8 @@
 		return FALSE
 	if(teleport_cooldown > world.time)
 		return FALSE
+	if(special_breach)
+		return
 	if(target) // Actively fighting
 		return FALSE
 	teleport_cooldown = world.time + teleport_cooldown_time
@@ -176,6 +176,8 @@
 	new /obj/effect/temp_visual/guardian/phase(get_turf(src))
 	SLEEP_CHECK_DEATH(5) // TODO: Add some cool effects here
 	animate(src, alpha = 255, time = 5)
+	if(special_breach)
+		return
 	new /obj/effect/temp_visual/guardian/phase/out(teleport_target)
 	forceMove(teleport_target)
 
@@ -197,6 +199,8 @@
 
 /mob/living/simple_animal/hostile/abnormality/despair_knight/BreachEffect(mob/living/carbon/human/user, breach_type)
 	. = ..()
+	if(special_breach)
+		return TRUE
 	icon_living = "despair_breach"
 	icon_state = icon_living
 	addtimer(CALLBACK(src, PROC_REF(TryTeleport)), 5)
@@ -207,84 +211,32 @@
 		return FALSE
 	return ..()
 
-//Nihil Event code - TODO: Add friendly summons TODO: Add a way to teleport to nihil
+// Jester of nihil event code
 /mob/living/simple_animal/hostile/abnormality/despair_knight/proc/EventStart()
 	set waitfor = FALSE
-	NihilModeEnable()
+	AIStatus = AI_OFF
+	EventIcons()
 	ChangeResistances(list(RED_DAMAGE = 0, WHITE_DAMAGE = 0, BLACK_DAMAGE = 0, PALE_DAMAGE = 0))
-	SLEEP_CHECK_DEATH(6 SECONDS)
-	say("At last, a worthy foe.")
-	SLEEP_CHECK_DEATH(6 SECONDS)
-	say("All of my work won't be in vain.")
-	SLEEP_CHECK_DEATH(6 SECONDS)
-	say("You'll answer for your crimes!")
-	SLEEP_CHECK_DEATH(6 SECONDS)
-	say("To protect our people!")
-	ChangeResistances(list(RED_DAMAGE = 1.2, WHITE_DAMAGE = 1.0, BLACK_DAMAGE = 0.8, PALE_DAMAGE = 0.5))
+	special_breach = TRUE
+	SLEEP_CHECK_DEATH(24 SECONDS)
+	icon_state = "despair_breach"
+	name = "Ossified Despair"
+	ADD_TRAIT(src, TRAIT_NOBLEED, MAGIC_TRAIT)
+	pixel_x = -4
+	base_pixel_x = -4
+	var/newcolor = list(rgb(77,77,77), rgb(150,150,150), rgb(28,28,28), rgb(0,0,0))
+	add_atom_colour(newcolor, FIXED_COLOUR_PRIORITY)
+	status_flags |= GODMODE
+	environment_smash = ENVIRONMENT_SMASH_NONE
+	dir = SOUTH
+	update_icon()
 
-/mob/living/simple_animal/hostile/abnormality/despair_knight/proc/NihilModeEnable()
-	NihilIconUpdate()
-	nihil_present = TRUE
-	fear_level = ZAYIN_LEVEL
-	faction = list("neutral")
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/proc/NihilIconUpdate()
+/mob/living/simple_animal/hostile/abnormality/despair_knight/proc/EventIcons()
 	name = "Magical Girl of Justice"
 	desc = "A real magical girl!"
 	icon = 'ModularTegustation/Teguicons/48x48.dmi'
 	icon_state = "despair_friendly"
 	pixel_x = -8
 	base_pixel_x = -8
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/Found(atom/A)
-	if(istype(A, /mob/living/simple_animal/hostile/abnormality/nihil)) // 1st Priority
-		return TRUE
-	return ..()
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/petrify(statue_timer)
-	if(!isturf(loc))
-		MoveStatue()
-	AIStatus = AI_OFF
-	icon_state = "despair_breach"
-	var/obj/structure/statue/petrified/magicalgirl/S = new(loc, src, statue_timer)
-	S.name = "Ossified Despair"
-	ADD_TRAIT(src, TRAIT_NOBLEED, MAGIC_TRAIT)
-	SLEEP_CHECK_DEATH(1)
-	S.icon = src.icon
-	S.icon_state = src.icon_state
-	S.pixel_x = -4
-	S.base_pixel_x = -4
-	var/newcolor = list(rgb(77,77,77), rgb(150,150,150), rgb(28,28,28), rgb(0,0,0))
-	S.add_atom_colour(newcolor, FIXED_COLOUR_PRIORITY)
-	stat = DEAD
-	return TRUE
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/proc/MoveStatue()
-	var/list/teleport_potential = list()
-	if(!LAZYLEN(GLOB.department_centers))
-		for(var/mob/living/L in GLOB.mob_living_list)
-			if(L.stat == DEAD || L.z != z || L.status_flags & GODMODE)
-				continue
-			teleport_potential += get_turf(L)
-	if(!LAZYLEN(teleport_potential))
-		var/turf/P = pick(GLOB.department_centers)
-		teleport_potential += P
-	var/turf/teleport_target = pick(teleport_potential)
-	new /obj/effect/temp_visual/guardian/phase(get_turf(src))
-	new /obj/effect/temp_visual/guardian/phase/out(teleport_target)
-	forceMove(teleport_target)
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/death(gibbed)
-	if(!nihil_present)
-		return ..()
-	adjustBruteLoss(-999999)
-	visible_message(span_boldwarning("Oh no, [src] has been defeated!"))
-	INVOKE_ASYNC(src, PROC_REF(petrify), 500000)
-	return FALSE
-
-/mob/living/simple_animal/hostile/abnormality/despair_knight/gib()
-	if(nihil_present)
-		death()
-		return FALSE
-	return ..()
-
+	fear_level = 0
+	faction = list("neutral")

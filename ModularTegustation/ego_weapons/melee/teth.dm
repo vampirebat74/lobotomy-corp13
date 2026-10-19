@@ -248,7 +248,7 @@
 	name = "hearth"
 	desc = "Home sweet home. Warmth and safety aplenty."
 	icon_state = "hearth"
-	force = 10
+	force = 9
 	attack_speed = 1
 	damtype = WHITE_DAMAGE
 	attack_verb_continuous = list("pokes", "jabs", "tears", "lacerates", "gores")
@@ -262,9 +262,6 @@
 	block_message = "You attempt to parry the attack!"
 	hit_message = "parries the attack!"
 	block_cooldown_message = "You rearm your blade."
-
-/obj/item/ego_weapon/shield/hearth/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = MELEE_ATTACK)
-	return 0 //Prevents ranged  parry
 
 /obj/effect/temp_visual/smash1
 	icon = 'icons/effects/effects.dmi'
@@ -375,7 +372,7 @@
 	playsound(T, 'sound/effects/ordeals/amber/midnight_out.ogg', 40,TRUE)
 	for(var/turf/open/T2 in RANGE_TURFS(range, src))
 		new /obj/effect/temp_visual/yellowsmoke(T2)
-		for(var/mob/living/L in creator.HurtInTurf(T2, list(), resonance_damage * damage_multiplier, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE))
+		for(var/mob/living/L in creator.HurtInTurf(T2, list(), resonance_damage * damage_multiplier, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, flags = (DAMAGE_UNTRACKABLE), attack_type = (ATTACK_TYPE_ENVIRONMENT)))
 			to_chat(L, span_userdanger("[src] bites you!"))
 			if(creator)
 				creator.visible_message(span_danger("[creator] activates [src] on [L]!"),span_danger("You activate [src] on [L]!"), null, COMBAT_MESSAGE_RANGE, L)
@@ -420,7 +417,7 @@
 		++hit_count
 		if(hit_count >= 4)
 			var/mob/living/simple_animal/M = target
-			if(!ishuman(M) && !M.has_status_effect(/datum/status_effect/display/rend/black))
+			if(!ishuman(M))
 				playsound(src, 'sound/abnormalities/so_that_no_cry/curse_talisman.ogg', 100, 1)
 				to_chat(user, "A talisman from [src] sticks onto [target]!")
 				new /obj/effect/temp_visual/talisman(get_turf(M))
@@ -433,7 +430,7 @@
 	icon_state = "capote"
 	worn_icon = 'icons/obj/clothing/belt_overlays.dmi'
 	worn_icon_state = "capote"
-	force = 10
+	force = 9
 	attack_speed = 1
 	damtype = RED_DAMAGE
 	attack_verb_continuous = list("pokes", "jabs", "tears", "lacerates", "gores")

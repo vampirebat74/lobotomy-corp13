@@ -69,6 +69,18 @@
 			(The wolf seems unhappy)"),
 	)
 
+	work_start_lines = list("Hey, %PERSON. By any chance, is there a little chubby baby pig in this place? Oh, it's nothing important. \
+	He was my friend, I just want to see how he's doing nowadays.", "Oh little %PERSON, will you open the door, please? I won't hurt anyone, I swear it. I'm just a little bit hungry.",
+	"%PERSON, I'll give you something good if you let me out!")
+	early_work_lines = list("%ABNO vividly remembers the moment when his belly was torn open and his guts spilled out.",
+	"%ABNO likes meat over anything else. He used to be always hungry, now he wants to be always full.")
+	middle_work_lines = list("%ABNO suffers from chronic indigestion. The origin of this problem of his goes back to the very, very far past...",
+	"According to reports from employees who have been inside %ABNO's stomach, it is a dark, empty, lonely place.")
+	late_work_lines = list("What big teeth I have, all the better for eating with.", "\"I'll huff, and I'll puff, and I'll blow this room away with one breath!\"",
+	"\"Open the door sweetheart, I've brought you a basket of gifts from the forest.\"")
+	work_end_lines = list("I am a big bad wolf, I'll gobble you all up and get out of this place!", "%PERSON, I'm telling this secret only to you.\
+	If you ever build a house, make it a sturdy brick house.")
+
 	var/can_act = TRUE
 	//For when the wolf becomes incorporal and flees.
 	var/last_reached_health = 75
@@ -223,7 +235,7 @@
 	playsound(get_turf(src), 'sound/abnormalities/big_wolf/Wolf_FogChange.ogg', 75, 1)
 	ADD_TRAIT(src, TRAIT_MOVE_PHASING, "fleeing")
 	AIStatus = AI_OFF
-	target = null
+	LoseTarget(FALSE)
 	walk_to(src, 0)
 	TemporarySpeedChange(-2, 3 SECONDS)
 	fleeing_now = TRUE
@@ -317,9 +329,9 @@
 				if(isclosedturf(T))
 					continue
 				new /obj/effect/temp_visual/slice(T)
-				hit_mob = HurtInTurf(T, hit_mob, 19, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = TRUE)
+				hit_mob = HurtInTurf(T, hit_mob, 19, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 				for(var/mob/living/simple_animal/hostile/abnormality/red_hood/mercenary in hit_mob)
-					mercenary.deal_damage(50, RED_DAMAGE) //triple damge to red
+					mercenary.deal_damage(50, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)) //triple damge to red
 	can_act = TRUE
 
 //Used in Steel noons for if they are allowed to fly through something.

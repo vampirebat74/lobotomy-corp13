@@ -59,6 +59,12 @@
 			There is no other option but to remain unquestionably loyal."),
 	)
 
+	work_start_lines = list("For bees, a disorderly hive is something that cannot be tolerated.")
+	early_work_lines = list("Bees normally have no need for soldiers, and yet...", "The highest priority for bees would be the safety of their hive.")
+	middle_work_lines = list("If %ABNO were to ever recieve an order from its ruler, something terrible will occur.", "Bees have no need to speak, all messages are carried by sight and smell alone.")
+	late_work_lines = list("The greatest desire for a soldier ought to never be needed. %ABNO fears that day.", "If %PERSON ever inadvertently brought %ABNO its orders...")
+	work_end_lines = list("%ABNO waits for the completion of the kingdom, for a kingdom will always have need of soldiers.")
+
 	var/fire_cooldown_time = 3 SECONDS	//She has 4 cannons, fires 4 times faster than the artillery bees
 	var/fire_cooldown
 	var/fireball_range = 30
@@ -468,7 +474,7 @@
 	for(var/mob/living/L in view(2, src))
 		if(faction_check(faction, L.faction, FALSE))
 			continue
-		L.deal_damage(boom_damage, list(RED_DAMAGE, BLACK_DAMAGE))
+		L.deal_split_damage(boom_damage, list(RED_DAMAGE, BLACK_DAMAGE), attack_type = (ATTACK_TYPE_SPECIAL))
 		if(L.health < 0)
 			L.gib()
 	new /obj/effect/temp_visual/explosion(get_turf(src))

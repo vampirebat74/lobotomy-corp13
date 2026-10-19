@@ -66,13 +66,18 @@
 		"Hello" = list(TRUE, "The robot lifts both arms with some struggle. <br>\
 			The terminal prints out its words: <br>\
 			<Welcome, Dear Guest. Have you enjoyed the town tour? \
-			We’d like you to have a souvenir. :-)> <br>\
+			We'd like you to have a souvenir. :-)> <br>\
 			A smile is displayed on the terminal, <br>\
 			but in the robot’s gestures, you feel a plea for help."),
 		"Goodbye" = list(FALSE, "The terminal’s light goes red, and warnings start to blare. <br>\
 			The robot shakes intensely as if in pain. <br>\
 			<Farewell. <br>Farewell, <br>FarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewellFarewell>"),
 	)
+
+	work_start_lines = list("In the Backstreets, you could sometimes find toys from ages ago.")
+	early_work_lines = list("%ABNO is clearly unfinished, for what purpose it was created is uncertain.")
+	middle_work_lines = list("Due to power failure or some other issue, a terminal on %ABNO's chest is dark.")
+	work_end_lines = list("%PERSON wonders about the \"Souvenier\" %ABNO occasionally mentions.", "%ABNO attempts to raise a hand in farewell, but is unable to do so.")
 
 	var/can_act = TRUE
 	var/grab_cooldown
@@ -156,7 +161,7 @@
 
 /mob/living/simple_animal/hostile/abnormality/kqe/AttemptWork(mob/living/carbon/human/user, work_type)
 	if((work_type != "Write HELLO") && (work_type != "Write GOODBYE") && (work_type != "Write DUMBASS") && !question)
-		return TRUE
+		return ..()
 	if(((work_type == "Write HELLO") || (work_type == "Write GOODBYE") || (work_type == "Write DUMBASS")) && !question)
 		to_chat(user, span_notice("The terminal is blank."))
 		return FALSE
@@ -236,7 +241,7 @@
 	SLEEP_CHECK_DEATH(10)
 	for(var/turf/T in view(2, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		HurtInTurf(T, list(), melee_damage_upper, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE)
+		HurtInTurf(T, list(), melee_damage_upper, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	icon_state = "kqe_prepare2"
 	SLEEP_CHECK_DEATH(3)
 	icon_state = icon_living
@@ -300,7 +305,7 @@
 		M.ejectall()
 	for(var/mob/living/carbon/human/H in view(1, src))
 		grabbed = TRUE
-		H.deal_damage(boom_damage, BLACK_DAMAGE)
+		H.deal_damage(boom_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 		H.forceMove(get_turf(src))//pulls them all to the target
 		GrabStun(H)
 	if(grabbed)

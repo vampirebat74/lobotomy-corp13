@@ -38,6 +38,9 @@
 			You'll be back again and still won't understand their grief."),
 	)
 
+	work_start_lines = list("Ahh, woe is us. We have become sinners. Please, hear us, hear of our sins that we do not know we've commited, an absolve us of our grief....")
+	work_end_lines = list("%PERSON tries to recall %ABNO's words but cannot. Absolution will never come for them.")
+
 	var/breaching = FALSE
 
 //Work Mechanics
@@ -73,7 +76,7 @@
 		return
 	to_chat(user, span_userdanger("You are attacked by an invisible assailant!"))
 	playsound(get_turf(src), 'sound/abnormalities/jangsan/tigerbite.ogg', 75, 0)
-	user.deal_damage(50, RED_DAMAGE, null)
+	user.deal_damage(50, RED_DAMAGE)
 	if(user.health < 0 || user.stat == DEAD)
 		user.gib()
 	return

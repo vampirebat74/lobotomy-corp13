@@ -48,6 +48,10 @@
 			Eventually you collapse in the snow, your whole body frozen. <br>Ahh... <br>There's no more pain..."),
 	)
 
+	work_start_lines = list("The palace of ice is so cold, %PERSON can't bear to stand at the door for long.")
+	early_work_lines = list("%PERSON hesitates to knock on %ABNO's door, lest the terrifying witch inside answer.", "Stay frozen... and there will be no pain.")
+	middle_work_lines = list("%PERSON rubs their own arms for warmth, but the cold refuses to let up.")
+
 	var/jump_cooldown = 0
 	var/jump_cooldown_time = 35 SECONDS
 	var/list/spawned_mobs = list()
@@ -162,9 +166,9 @@
 			continue
 		var/dist = get_dist(src, L)
 		if(ishuman(L)) //Different damage formulae for humans vs mobs
-			L.deal_damage(clamp((5 * (2 ** (8 - dist))), 5, 100), RED_DAMAGE)
+			L.deal_damage(clamp((5 * (2 ** (8 - dist))), 5, 100), RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		else
-			L.deal_damage(200 - ((dist > 2 ? dist : 0 )* 25), RED_DAMAGE) //0-600 damage scaling on distance, we don't want it oneshotting mobs
+			L.deal_damage(200 - ((dist > 2 ? dist : 0 )* 25), RED_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)) //0-600 damage scaling on distance, we don't want it oneshotting mobs
 		if(L.health < 0)
 			L.gib()
 	SLEEP_CHECK_DEATH(5)

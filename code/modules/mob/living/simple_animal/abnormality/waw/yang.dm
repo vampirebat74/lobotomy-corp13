@@ -38,10 +38,10 @@
 	neutral_boxes = 9
 
 	ego_list = list(
-		/datum/ego_datum/weapon/assonance,
-		/datum/ego_datum/armor/assonance,
+		/datum/ego_datum/weapon/accord,
+		/datum/ego_datum/armor/accord,
 	)
-	gift_type = /datum/ego_gifts/assonance
+	gift_type = /datum/ego_gifts/accord
 	abnormality_origin = ABNORMALITY_ORIGIN_ALTERED
 
 	grouped_abnos = list(
@@ -72,6 +72,10 @@
 		"Don't put it on" = list(FALSE, "It is all that is bright given form, made to gather all the positivity in the world. <br>\
 			If you can't accept the goodness in yourself, you're not ready to accept the goodness of the world."),
 	)
+
+	work_start_lines = list("Please ensure these two pendants are contained in seperate rooms.")
+	middle_work_lines = list("%ABNO brings order to the world, yet also erases such order.")
+	work_end_lines = list("The world will be overturned the day the black carp and white carp meet.")
 
 	var/explosion_damage = 100
 	var/explosion_timer = 7 SECONDS
@@ -110,35 +114,14 @@
 			return TRUE
 	return FALSE
 
-/mob/living/simple_animal/hostile/abnormality/yang/bullet_act(obj/projectile/P, def_zone, piercing_hit = FALSE)
-	apply_damage(P.damage, P.damage_type)
-	P.on_hit(src, 0, piercing_hit)
-	if(!P.firer)
-		return BULLET_ACT_HIT
-	Reflect(P.firer, P.damage)
-	return BULLET_ACT_HIT
-
-/mob/living/simple_animal/hostile/abnormality/yang/attacked_by(obj/item/I, mob/living/user)
+/mob/living/simple_animal/hostile/abnormality/yang/PostDamageReaction(damage_amount, damage_type, source, attack_type)
 	. = ..()
-	Reflect(user, I.force)
-	return
-
-/mob/living/simple_animal/hostile/abnormality/yang/attack_hand(mob/living/carbon/human/M)
-	. = ..()
-	Reflect(M, 2)
-	return
-
-/mob/living/simple_animal/hostile/abnormality/yang/attack_animal(mob/living/simple_animal/M)
-	. = ..()
-	Reflect(M, M.melee_damage_upper)
-	return
+	if((. <= 0) || !isliving(source) || (attack_type & (ATTACK_TYPE_COUNTER | ATTACK_TYPE_ENVIRONMENT | ATTACK_TYPE_STATUS)))
+		return
+	Reflect(source, .)
 
 /mob/living/simple_animal/hostile/abnormality/yang/proc/Reflect(mob/living/attacker, damage)
-	if(ishuman(attacker))
-		var/mob/living/carbon/human/H = attacker
-		var/justice_mod = get_attack_multiplier(H)
-		damage *= justice_mod
-	attacker.deal_damage(damage, WHITE_DAMAGE)
+	attacker.deal_damage(damage, WHITE_DAMAGE, source = src, attack_type = (ATTACK_TYPE_COUNTER | ATTACK_TYPE_SPECIAL))
 	return
 
 /mob/living/simple_animal/hostile/abnormality/yang/death()
@@ -187,7 +170,7 @@
 			if(get_dist(src, T) > i)
 				continue
 			new /obj/effect/temp_visual/dir_setting/speedbike_trail(T)
-			HurtInTurf(T, list(), explosion_damage, WHITE_DAMAGE, hurt_mechs = TRUE)
+			HurtInTurf(T, list(), explosion_damage, WHITE_DAMAGE, hurt_mechs = TRUE, flags = (DAMAGE_UNTRACKABLE), attack_type = (ATTACK_TYPE_SPECIAL))
 			all_turfs -= T
 		SLEEP_CHECK_DEATH(1)
 

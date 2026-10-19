@@ -75,6 +75,11 @@
 			All that’s left is the sticky blue resin."),
 	)
 
+	work_start_lines = list("%ABNO is sitting languidly still and crying strange noises.")
+	early_work_lines = list("%ABNO's protruding eyeballs were shifting around, making %PERSON feel uneasy.")
+	middle_work_lines = list ("%ABNO was sitting still, holding those patches of gloomy resin, covering bottom part of it's containment unit.")
+	work_end_lines = list("As %PERSON was finishing their work, %ABNO fell silent for a moment, before returning to cavernous wailing.")
+
 	//work
 	var/pulse_healing = 15
 	var/healing_pulse_amount = 0
@@ -202,7 +207,7 @@
 			if(T.density)
 				break
 			if(idiot in T)
-				idiot.deal_damage(tongue_damage, BLACK_DAMAGE)
+				idiot.deal_damage(tongue_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL))
 				new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(idiot), pick(GLOB.alldirs))
 				if(!idiot.anchored)
 					var/whack_speed = (prob(60) ? 1 : 4)

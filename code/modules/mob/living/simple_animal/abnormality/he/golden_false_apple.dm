@@ -84,6 +84,10 @@
 			You are swept in the tide. <br>Your flesh is riddled with wounds as they slowly devour you."),
 	)
 
+	work_start_lines = list("%ABNO's Containment Unit stinks of rot.", "%ABNO looks as immaculate as ever, but a hint of muck fills the air.")
+	middle_work_lines = list("%PERSON thinks for a moment that %ABNO might actually be hollow on the inside, but they dismiss the thought.",
+	"%PERSON thinks that if they were able to take %ABNO home, they would never have to work again.")
+
 	var/is_maggot = FALSE
 	var/can_act = TRUE
 	var/victim_name
@@ -244,6 +248,8 @@
 		playsound(src, 'sound/abnormalities/goldenapple/Gold_Attack.ogg', 100, 1)
 		addtimer(CALLBACK(src, PROC_REF(EatEmployees)), 15 SECONDS)
 		return ..()
+	pixel_x = -16
+	icon = 'ModularTegustation/Teguicons/abno_cores/he.dmi'
 	density = FALSE
 	for(var/atom/movable/AM in src) //morph code
 		AM.forceMove(loc)
@@ -274,7 +280,7 @@
 	icon = 'ModularTegustation/Teguicons/96x48.dmi'
 	icon_state = "false_apple"
 	icon_living = "false_apple"
-	icon_dead = "false_dead"
+	icon_dead = "false_egg"
 	death_message = "is reduced to a primordial egg."
 	name = "False Apple"
 	desc = "The apple ruptured and a swarm of maggots crawled inside, metamorphosing into a hideous face."
@@ -335,7 +341,7 @@
 	playsound(get_turf(src), 'sound/abnormalities/goldenapple/False_Attack2.ogg', 100, 0, 5)
 	for(var/turf/T in view(1, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		for(var/mob/living/carbon/L in HurtInTurf(T, list(), 100, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE))
+		for(var/mob/living/carbon/L in HurtInTurf(T, list(), 100, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)))
 			if(L.stat >= SOFT_CRIT)
 				if(!last_target)//only the last person killed counts
 					L.forceMove(src)
@@ -366,6 +372,7 @@
 			NestedItems(src, myhead)
 		QDEL_IN(H, 1)
 	desc = "The apple ruptured and a swarm of maggots crawled inside.. wait a minute, that's [victim_name]'s face."
+	loot = list(/obj/item/ego_weapon/ranged/maggotgun)
 	med_hud_set_health()//took a page from smock to update medhuds
 	med_hud_set_status()
 	update_health_hud()
@@ -425,7 +432,7 @@
 	dir = dir_to_target
 	for(var/turf/T in area_of_effect)
 		new /obj/effect/temp_visual/smash_effect(T)
-		for(var/mob/living/L in HurtInTurf(T, list(), smash_damage, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE))
+		for(var/mob/living/L in HurtInTurf(T, list(), smash_damage, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)))
 			var/datum/status_effect/stacking/maggots/G = L.has_status_effect(/datum/status_effect/stacking/maggots)
 			if(!G)
 				L.apply_status_effect(STATUS_EFFECT_MAGGOTS)
@@ -506,20 +513,11 @@
 
 /datum/status_effect/stacking/maggots/tick()//change this to golden apple's life tick for less lag
 	var/mob/living/carbon/human/status_holder = owner
-	status_holder.deal_damage(stacks/2, BLACK_DAMAGE)
+	status_holder.deal_damage(stacks/2, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	if(status_holder.stat < HARD_CRIT)
 		return
-	var/obj/structure/spider/cocoon/casing = new(status_holder.loc)
-	status_holder.forceMove(casing)
-	casing.name = "pile of maggots"
-	casing.desc = "They're wriggling and writhing over something."
-	casing.icon_state = pick(
-		"cocoon_large1",
-		"cocoon_large2",
-		"cocoon_large3",
-	)
-	casing.density = FALSE
-	casing.color = "#01F9C6"
+	new /obj/effect/decal/cleanable/maggot(get_turf(status_holder))
+	status_holder.gib()
 	qdel(src)
 
 /obj/item/food/grown/apple/gold/abnormality
@@ -549,6 +547,13 @@
 		G.add_stacks(1)
 		G.refresh()
 	return ..()
+
+/obj/effect/decal/cleanable/maggot
+	name = "maggots"
+	desc = "a gross puddle of maggots."
+	icon = 'icons/effects/blood.dmi'
+	icon_state = "remainslarva"
+	layer = LOW_SIGIL_LAYER//we want this to show above regular gib piles
 
 #undef STATUS_EFFECT_GOLDENSHEEN
 #undef STATUS_EFFECT_MAGGOTS

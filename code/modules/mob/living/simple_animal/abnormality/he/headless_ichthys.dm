@@ -54,6 +54,10 @@
 			The creature notices you, and prepares an attack. <br>It is impossible to evade, and you are torn to shreds."),
 	)
 
+	work_start_lines = list("%ABNO has the appearance of a fish with its head cut off.", "%ABNO exhibits motion in spite of its lack of a head.")
+	middle_work_lines = list("The cut surface is clean; it appears to have been done with a single-sided edge, such as a knife or a scythe.")
+	work_end_lines = list("%ABNO has an inflated sack around the chest. %PERSON sees something eerily similar to a human nervous system in the sack.")
+
 	var/can_act = TRUE
 	var/jump_cooldown = 0
 	var/jump_cooldown_time = 8 SECONDS
@@ -116,7 +120,7 @@
 			for(var/mob/living/L in T)
 				if(faction_check_mob(L))
 					continue
-				L.deal_damage(jump_damage, BLACK_DAMAGE)
+				L.deal_damage(jump_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 				if(L.health < 0)
 					L.gib()
 			for(var/obj/vehicle/sealed/mecha/V in T)
@@ -176,7 +180,7 @@
 					continue
 				already_hit += L
 				var/truedamage = ishuman(L) ? beam_damage : beam_damage/2 //half damage dealt to nonhumans
-				L.deal_damage(truedamage, BLACK_DAMAGE)
+				L.deal_damage(truedamage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL))
 			for(var/obj/vehicle/sealed/mecha/V in turfs_to_check)
 				if(V in already_hit)
 					continue

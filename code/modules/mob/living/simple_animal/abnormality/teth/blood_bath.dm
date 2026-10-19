@@ -49,6 +49,13 @@
 		"Did not grab a hand" = list(FALSE, "You looked away. <br>This is not the first time you ignore them. <br>It will be the same afterwards."),
 	)
 
+	work_start_lines = list("\"You know, after joining Lobotomy Corporation I really feel like I have my life back together.\"", "%PERSON can feel the sadness of %ABNO.",
+	"%PERSON's wrist aches when they look at %ABNO.")
+	middle_work_lines = list("\"Depression is a disease of the mind. We are the first doctors who discovered how to be happy.\"", "%PERSON stares at the despair which floats in the bath.",
+	"%PERSON senses overwhelming despair and sadness.")
+	work_end_lines = list("\"Medicine to heal the body has developed at such a tremendous rate, meanwhile treatments for the mind lie stagnant.\"",
+	"%PERSON can see upcoming hardship and failure.", "%PERSON can see upcoming hardship and many ordeals in the future. No matter what they do, it will only result in failure.")
+
 	var/hands = 0
 	var/can_act = TRUE
 	var/special_attack_cooldown
@@ -115,7 +122,7 @@
 	for(var/turf/T in view(3, src))
 		var/obj/effect/temp_visual/small_smoke/halfsecond/FX =  new(T)
 		FX.color = "#b52e19"
-		for(var/mob/living/carbon/human/H in HurtInTurf(T, list(), 10, WHITE_DAMAGE, null, null, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE))
+		for(var/mob/living/carbon/human/H in HurtInTurf(T, list(), 10, WHITE_DAMAGE, null, null, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)))
 			if(H.sanity_lost)
 				H.gib()
 	playsound(get_turf(src), 'sound/abnormalities/bloodbath/Bloodbath_EyeOn.ogg', 125, FALSE, 6)

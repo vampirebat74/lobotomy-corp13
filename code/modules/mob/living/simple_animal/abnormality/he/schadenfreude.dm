@@ -49,6 +49,9 @@
 			The box comes to life with saws and blades, but all it is for - is to catch your attention."),
 	)
 
+	work_start_lines = list("The warning to not look at %ABNO has caused many employees to fall curious, leading to many a terrible incident.")
+	middle_work_lines = list("When you feel an unrelenting gaze upon you even while you are alone, it is already too late.")
+
 	var/seen //Are you being looked at right now?
 	var/solo_punish	//Is an agent alone on the Z level, but not overall?
 	var/total_players
@@ -111,11 +114,11 @@
 		return 0
 	return init_work_chance
 
-//For when only one person is on the server. The person who works it takes 90 damage minimum per work.
+//For when only one person is on the server. The person who works it takes 54 damage minimum per work.
 /mob/living/simple_animal/hostile/abnormality/schadenfreude/Worktick(mob/living/carbon/human/user)
 	. = ..()
 	if(total_players == 1)
-		user.apply_damage(1, RED_DAMAGE, null, user.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+		user.deal_damage(1, RED_DAMAGE)
 
 /mob/living/simple_animal/hostile/abnormality/schadenfreude/BreachEffect(mob/living/carbon/human/user, breach_type)
 	. = ..()

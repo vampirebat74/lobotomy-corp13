@@ -87,11 +87,11 @@
 		return TRUE
 
 /obj/item/ego_weapon/ranged/pistol/rats/afterattack(atom/target, mob/living/user, flag, params)
-	if(flag && (user.a_intent == INTENT_HARM || forced_melee)) // Don't want to take damage when just using melee
+	if(flag) // Don't want to take damage when just using melee
 		return ..()
 	if(prob(50))
 		to_chat(user,span_warning("You pinch your fingers in the weapon."))
-		user.apply_damage(2, RED_DAMAGE, null, user.run_armor_check(null, RED_DAMAGE))
+		user.deal_damage(2, RED_DAMAGE)
 		return FALSE
 	return ..()
 

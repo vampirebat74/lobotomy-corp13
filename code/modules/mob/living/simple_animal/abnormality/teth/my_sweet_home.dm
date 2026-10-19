@@ -62,6 +62,9 @@
 			But at the last minute, you are pulled away by another agent to safety."),
 	)
 
+	work_start_lines = list("A melancholic feeling bubbles in %PERSON at the sight of %ABNO - when was the last time they've been home?")
+	middle_work_lines = list("Poor %PERSON has to work in this slaughterhouse of a company. This is so sad... %PERSON.", "Because I'm a home. A happy little home for %PERSON. You're always safe in your home, right?")
+
 	var/ranged_damage = 10
 	var/damage_dealt = 0
 	var/list/attach_once = list()
@@ -188,7 +191,7 @@
 	var/turf/target_turf = get_turf(src)
 	for(var/turf/open/T in view(target_turf, 3))
 		hit_turfs |= T
-		for(var/mob/living/L in HurtInTurf(T, list(), ranged_damage, RED_DAMAGE, hurt_mechs = TRUE))
+		for(var/mob/living/L in HurtInTurf(T, list(), ranged_damage, RED_DAMAGE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)))
 			if((L.stat < DEAD) && !(L.status_flags & GODMODE))
 				damage_dealt += ranged_damage
 	if(damage_dealt > 0)

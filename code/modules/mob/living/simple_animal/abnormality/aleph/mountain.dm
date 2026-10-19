@@ -56,6 +56,9 @@
 		"I don't recognize them" = list(FALSE, "They're holding all the laughter of those who cannot be seen here. <br>The mounds begins to shamble, upon borrowed hands and feet, it has your scent now and it will never be satisfied."),
 	)
 
+	work_start_lines = list("%ABNO is searching for the smell of a body, carrying the smiles of many.")
+	middle_work_lines = list("%ABNO waits for the oncoming smell of blood, holding all of the laughter of those who cannot be seen here.")
+
 	/// Is user performing work hurt at the beginning?
 	var/agent_hurt = FALSE
 	var/death_counter = 0
@@ -278,7 +281,7 @@
 	playsound(get_turf(src), 'sound/abnormalities/mountain/scream.ogg', 75, 1, 5)
 	var/list/been_hit = list()
 	for(var/turf/T in view(7, src))
-		HurtInTurf(T, been_hit, scream_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = TRUE)
+		HurtInTurf(T, been_hit, scream_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = TRUE, attack_type = (ATTACK_TYPE_SPECIAL))
 
 /mob/living/simple_animal/hostile/abnormality/mountain/proc/Slam(range)
 	if(slam_cooldown > world.time)
@@ -289,7 +292,7 @@
 	var/list/been_hit = list()
 	for(var/turf/open/T in view(2, src))
 		new /obj/effect/temp_visual/small_smoke/halfsecond(T)
-		HurtInTurf(T, been_hit, slam_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = FALSE, hurt_structure = TRUE, break_not_destroy = TRUE)
+		HurtInTurf(T, been_hit, slam_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = FALSE, hurt_structure = TRUE, break_not_destroy = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 
 /mob/living/simple_animal/hostile/abnormality/mountain/proc/Spit(atom/target)
 	if(spit_cooldown > world.time)
@@ -353,7 +356,7 @@
 	if(LAZYLEN(high_priority_turfs))
 		target_turf = get_closest_atom(/turf/open, high_priority_turfs, src)
 		if(phase <= 1)
-			target = null
+			LoseTarget(FALSE)
 	else if(LAZYLEN(medium_priority_turfs))
 		target_turf = get_closest_atom(/turf/open, medium_priority_turfs, src)
 	else if(LAZYLEN(low_priority_turfs))
@@ -382,7 +385,7 @@
 /mob/living/simple_animal/hostile/abnormality/mountain/AttemptWork(mob/living/carbon/human/user, work_type)
 	if(user.health != user.maxHealth)
 		agent_hurt = TRUE
-	return TRUE
+	return ..()
 
 /* Abnormality breach */
 

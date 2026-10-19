@@ -48,6 +48,10 @@
 			(Your flesh turns grey, no one will need such a horrid looking carriage.)"),
 	)
 
+	work_start_lines = list("%PERSON's nose twitches at the scent of decay emanating from %ABNO.", "%ABNO is remembering the happiest night of its life.")
+	early_work_lines = list("%ABNO has served its purpose and no one has need of it anymore.", "No one will need such a horrid looking carriage.")
+	work_end_lines = list("Let's go back to that wonderous, magical night....")
+
 	var/freshness = 0
 	//Breach stuff
 	var/maxSegments = 1
@@ -156,7 +160,7 @@
 					else
 						playsound(get_turf(seg), 'sound/abnormalities/cinderella/horse2.ogg', 100, 0, 40)
 					seg.noise = 1
-				M.deal_damage(20, WHITE_DAMAGE)
+				M.deal_damage(20, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 				if(ishuman(M))
 					var/mob/living/carbon/human/C = M
 					if(C.sanity_lost)

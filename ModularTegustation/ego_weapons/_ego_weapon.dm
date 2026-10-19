@@ -35,19 +35,13 @@
 	if(!CanUseEgo(user))
 		return FALSE
 	. = ..()
-
-	if(charge && attack_charge_gain)
-		HandleCharge(1, target)
-		if(user.a_intent != INTENT_HARM) // Spear/whip/lance thrust visuals
-			get_thrust_turfs(target, user)
+	if(reach >= 2 && user.a_intent != INTENT_HARM && !user.Adjacent(target)) // Spear/whip/lance thrust visuals
+		get_thrust_turfs(target, user)
 	if(stuntime)
 		if((reach >= 2 && !user.Adjacent(target)) ||  reach < 2) // Reach weapon stuff
 			user.Immobilize(stuntime)
 			//Visual stuff to give you better feedback
 			user.HealingEffect("stun")
-			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(target), pick(GLOB.alldirs))
-			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(target), pick(GLOB.alldirs))
-			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(target), pick(GLOB.alldirs))
 
 	if(target.anchored || !knockback || QDELETED(target)) // lets not throw machines around
 		return TRUE
@@ -91,6 +85,8 @@
 	. = ..()
 	if(!is_ranged)
 		. += EgoAttackInfo(user)
+	else
+		. += GunAttackInfo()
 	if(special)
 		. += span_notice("[special]")
 	if(tool_behaviour == TOOL_MINING)
@@ -226,6 +222,9 @@
 	if(force_multiplier != 1)
 		return span_notice("It deals [round(damage * force_multiplier, 0.1)] [damage_type] damage. (+ [(force_multiplier - 1) * 100]%)")
 	return span_notice("It deals [damage] [damage_type] damage.")
+
+/obj/item/ego_weapon/proc/GunAttackInfo()
+	return
 
 /obj/item/ego_weapon/GetTarget(mob/user, list/potential_targets = list())
 	if(damtype != WHITE_DAMAGE)

@@ -57,6 +57,10 @@
 			If you can't accept the darkness of the world, you're not ready to accept the darkness in you."),
 	)
 
+	work_start_lines = list("Please ensure these two pendants are contained in separate rooms.")
+	early_work_lines = list("%ABNO brings chaos to the world, yet also erases such chaos.")
+	late_work_lines = list("The world will be overturned the day the black carp and white carp meet.")
+
 	faction = list("neutral", "hostile") // Not fought by anything, typically. But...
 	var/faction_override = list("hostile") // The effects hit non-hostiles.
 
@@ -211,30 +215,14 @@
 			COOLDOWN_START(src, pulse, pulse_cooldown)
 			INVOKE_ASYNC(src, PROC_REF(Pulse))
 
-/mob/living/simple_animal/hostile/abnormality/yin/attacked_by(obj/item/I, mob/living/user)
-	. = ..()
-	PulseOrLaser(user)
-
-/mob/living/simple_animal/hostile/abnormality/yin/attack_hand(mob/living/carbon/human/M)
-	. = ..()
-	PulseOrLaser(M)
-
-/mob/living/simple_animal/hostile/abnormality/yin/attack_animal(mob/living/simple_animal/M)
-	. = ..()
-	PulseOrLaser(M)
-
 /mob/living/simple_animal/hostile/abnormality/yin/OpenFire()
 	FireLaser(target)
 
-/mob/living/simple_animal/hostile/abnormality/yin/bullet_act(obj/projectile/P, def_zone, piercing_hit = FALSE)
-	apply_damage(P.damage, P.damage_type)
-	P.on_hit(src, 0, piercing_hit)
-	. = BULLET_ACT_HIT
-	if(!P.firer)
-		return .
-	if(!isliving(P.firer) && !ismecha(P.firer))
-		return .
-	PulseOrLaser(P.firer)
+/mob/living/simple_animal/hostile/abnormality/yin/PostDamageReaction(damage_amount, damage_type, source, attack_type)
+	. = ..()
+	if(!isliving(source) && !ismecha(source))
+		return
+	PulseOrLaser(source)
 
 /mob/living/simple_animal/hostile/abnormality/yin/AttackingTarget(atom/attacked_target)
 	return FALSE
@@ -246,7 +234,7 @@
 		var/list/to_hit = range(i, src) - hit_turfs
 		hit_turfs |= to_hit
 		for(var/turf/open/OT in to_hit)
-			hit = HurtInTurf(OT, hit, pulse_damage, BLACK_DAMAGE, null, TRUE, faction_override, TRUE)
+			hit = HurtInTurf(OT, hit, pulse_damage, BLACK_DAMAGE, null, TRUE, faction_override, TRUE, attack_type = (ATTACK_TYPE_SPECIAL))
 			new /obj/effect/temp_visual/small_smoke/yin_smoke/short(OT)
 		sleep(3)
 

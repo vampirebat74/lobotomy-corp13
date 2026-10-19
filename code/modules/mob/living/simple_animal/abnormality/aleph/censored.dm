@@ -58,6 +58,10 @@
 			You're not ready to build the future."),
 	)
 
+	work_start_lines = list("%PERSON is (CENSORED) to (CENSORED).")
+	early_work_lines = list("%PERSON is feeling (CENSORED) from (CENSORED).")
+	late_work_lines = list("(CENSORED) is doing (CENSORED) and... Goodness, that's disgusting.")
+
 	var/can_act = TRUE
 	var/ability_damage = 60
 	var/ability_cooldown
@@ -202,12 +206,11 @@
 	Beam(T, "censored", time = 10)
 	playsound(src, 'sound/weapons/ego/censored3.ogg', 75, FALSE, 5)
 	for(var/turf/TT in turf_list)
-		for(var/mob/living/L in HurtInTurf(TT, list(), ability_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = TRUE))
+		for(var/mob/living/L in HurtInTurf(TT, list(), ability_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL)))
 			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
 			L.apply_status_effect(STATUS_EFFECT_OVERWHELMING_FEAR)
 	can_act = TRUE
 
-/* Work */
 /mob/living/simple_animal/hostile/abnormality/censored/AttemptWork(mob/living/carbon/human/user, work_type)
 	if(work_type == "Sacrifice")
 		to_chat(user, span_warning("You hesitate for a moment..."))
@@ -238,7 +241,7 @@
 			user.AdjustStun(-999) //run for your life
 		datum_reference.working = FALSE
 		return null
-	return TRUE
+	return ..()
 
 /mob/living/simple_animal/hostile/abnormality/censored/PostWorkEffect(mob/living/carbon/human/user, work_type, pe, work_time)
 	if(user.sanity_lost)

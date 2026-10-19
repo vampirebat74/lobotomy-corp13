@@ -27,6 +27,10 @@
 	var/pulse_cooldown_time = 3 SECONDS
 	var/pulse_damage = 6
 
+	// Tutorial abnormality - doesn't really need a final observation.
+	work_start_lines = list("%ABNO is perfectly level on every face.")
+	middle_work_lines = list("You could say that %ABNO is a perfectly generic object.")
+
 /mob/living/simple_animal/hostile/abnormality/cube/BreachEffect(mob/living/carbon/human/user, breach_type)
 	. = ..()
 	GiveTarget(user)
@@ -56,6 +60,6 @@
 	for(var/mob/living/L in livinginview(8, src))
 		if(faction_check_mob(L))
 			continue
-		L.deal_damage(pulse_damage, WHITE_DAMAGE)
+		L.deal_damage(pulse_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 		new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
 

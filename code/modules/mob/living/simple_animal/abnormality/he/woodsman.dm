@@ -57,6 +57,10 @@
 		"A warm heart" = list(FALSE, "You’re a machine, aren’t you? A heart is unnecessary for a machine."),
 	)
 
+	work_start_lines = list("There is no need for %PERSON to be afraid of %ABNO as long as they are a cold person.")
+	early_work_lines = list("%ABNO collects hearts. It thought that if its heart started beating, it would be able to love.")
+	late_work_lines = list("Things that may have once been hearts are now shoved into %ABNO indiscriminately.")
+
 	// Flurry Vars
 	var/flurry_cooldown = 0
 	var/flurry_cooldown_time = 15 SECONDS
@@ -525,7 +529,7 @@
 		var/list/been_hit = list()
 		for(var/turf/T in area_of_effect)
 			new /obj/effect/temp_visual/smash_effect(T)
-			been_hit = HurtInTurf(T, been_hit, i > 6 ? flurry_big : flurry_small, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE)
+			been_hit = HurtInTurf(T, been_hit, i > 6 ? flurry_big : flurry_small, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		if (i > 6)
 			playsound(get_turf(src), 'sound/abnormalities/woodsman/woodsman_strong.ogg', 100, 0, 8) // BAM
 		else

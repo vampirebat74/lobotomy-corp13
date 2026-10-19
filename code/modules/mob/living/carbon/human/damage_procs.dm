@@ -1,6 +1,16 @@
 /// depending on the species, it will run the corresponding apply_damage code there
-/mob/living/carbon/human/apply_damage(damage = 0,damagetype = BRUTE, def_zone = null, blocked = FALSE, forced = FALSE, spread_damage = FALSE, wound_bonus = 0, bare_wound_bonus = 0, sharpness = SHARP_NONE, white_healable = FALSE)
-	return dna.species.apply_damage(damage, damagetype, def_zone, blocked, src, forced, spread_damage, wound_bonus, bare_wound_bonus, sharpness, white_healable)
+/mob/living/carbon/human/deal_damage(damage_amount, damage_type, source = null, flags = null, attack_type = null, blocked = null, def_zone = null, wound_bonus = 0, bare_wound_bonus = 0, sharpness = SHARP_NONE)
+	if(GLOB.damage_type_shuffler?.is_enabled && IsColorDamageType(damage_type)) // Yes I have to do yet another shuffler check here because god damn it we're handling human damage in the species datum
+		var/datum/damage_type_shuffler/shuffler = GLOB.damage_type_shuffler
+		damage_type = shuffler.mapping_offense[damage_type]
+
+	if(!PreDamageReaction(damage_amount, damage_type, source)) // If our forced argument isn't TRUE, then we expect to receive a TRUE from PreDamageReaction to continue the proc
+		return FALSE
+
+	. = dna.species.apply_damage(src, damage_amount, damage_type, source, flags, attack_type, blocked, def_zone, wound_bonus, bare_wound_bonus, sharpness)
+
+	PostDamageReaction(., damage_type, flags & DAMAGE_UNTRACKABLE ? null : source)
+	return TRUE
 
 
 
@@ -62,6 +72,9 @@
 /mob/living/carbon/human/adjustToxLoss(amount, updating_health = TRUE, forced = FALSE)
 	if(stat != DEAD)
 		DamageEffect(amount, TOX)
+	if(amount < 0)
+		if(physiology)
+			amount = min(0, amount * physiology.healing_mod)
 	. = ..()
 
 /mob/living/carbon/human/adjustFireLoss(amount, updating_health = TRUE, forced = FALSE, required_status)
@@ -73,23 +86,30 @@
 	if(stat != DEAD)
 		DamageEffect(amount, OXY)
 	. = ..()
-//
+
+/mob/living/carbon/human/heal_overall_damage(brute = 0, burn = 0, stamina = 0, required_status, updating_health = TRUE)
+	if(physiology)
+		brute  *= physiology.healing_mod
+		burn *= physiology.healing_mod
+	. = ..()
 
 /mob/living/carbon/human/proc/adjustSanityLoss(amount, forced = FALSE)
 	if((status_flags & GODMODE) || !attributes || stat == DEAD)
 		return FALSE
 	if(!forced && amount < 0 && HAS_TRAIT(src, TRAIT_SANITY_HEALING_BLOCKED))
 		return FALSE
+	if(amount > 0)
+		playsound(loc, 'sound/effects/sanity_damage.ogg', min(amount, 50), TRUE, -1)
+	else if(amount < 0)
+		HealingEffect("sanity")
+		if(physiology)
+			amount = min(0, amount * physiology.healing_mod)
 	sanityloss = clamp(sanityloss + amount, 0, maxSanity)
 	if(HAS_TRAIT(src, TRAIT_SANITYIMMUNE))
 		sanityloss = 0
 	if(sanityhealth > maxSanity)
 		sanityhealth = maxSanity
 	sanityhealth = clamp((maxSanity - sanityloss), 0, maxSanity)
-	if(amount > 0)
-		playsound(loc, 'sound/effects/sanity_damage.ogg', min(amount, 50), TRUE, -1)
-	else if(amount < 0)
-		HealingEffect("sanity")
 	if(sanity_lost && sanityhealth >= maxSanity)
 		QDEL_NULL(ai_controller)
 		sanity_lost = FALSE

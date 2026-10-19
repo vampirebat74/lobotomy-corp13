@@ -59,6 +59,11 @@
 		"Saved Kai" = list(FALSE, "Gerda saved Kai and returned home. <br>They lived happily ever after."),
 	)
 
+	work_start_lines = list("%ABNO's Containment Unit is storming with a frosty blizzard.", "%ABNO's Containment Unit glims with ice and frost.",
+	"Kai would have been gifted with the world if he had failed to complete the sculpture of \"eternity\" with splinters of ice.")
+	middle_work_lines = list("%ABNO's palace is cold and lonesome. %PERSON wants to leave this place as soon as they can.",
+	"The road to %ABNO's palace is freezing cold and still so long. %PERSON longs for warmth.")
+
 	ego_list = list(
 		/datum/ego_datum/weapon/frostsplinter,
 		/datum/ego_datum/armor/frostsplinter,
@@ -324,7 +329,7 @@
 	dir = dir_to_target
 	for(var/turf/T in area_of_effect)
 		new /obj/effect/temp_visual/smash_effect(T)
-		for(var/mob/living/L in HurtInTurf(T, list(), 4, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE))
+		for(var/mob/living/L in HurtInTurf(T, list(), 4, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)))
 			playsound(get_turf(src), 'sound/magic/teleport_app.ogg', 30, 1)
 
 	SLEEP_CHECK_DEATH(0.5 SECONDS)
@@ -334,16 +339,7 @@
 /mob/living/simple_animal/hostile/abnormality/snow_queen/proc/ProjectSplinter(mob/living/L, turf/T, projectile_telegraph_delay = 3)
 	if(!L || !T)
 		return
-	var/obj/projectile/frost_splinter/P
-	P = new(T)
-	P.starting = T
-	P.firer = src
-	P.fired_from = T
-	P.yo = L.y - T.y
-	P.xo = L.x - T.x
-	P.original = L
-	P.preparePixelProjectile(L, T)
-	addtimer(CALLBACK (P, TYPE_PROC_REF(/obj/projectile, fire)), projectile_telegraph_delay)
+	new /obj/effect/projectile_delayed(T, L, src, /obj/projectile/frost_splinter, projectile_telegraph_delay)
 
 		/*--------\
 		|WORK KISS|
@@ -667,7 +663,7 @@
 	RVP.NewSnowQueenEffect(T, duration, telegraph)
 	if(telegraph)
 		return
-	return HurtInTurf(T, list(), 7, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE)
+	return HurtInTurf(T, list(), 7, RED_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, attack_type = (ATTACK_TYPE_SPECIAL))
 
 //Code taken from big_wolf.dm. Essentially is a 3by3 dash at the target.
 /mob/living/simple_animal/hostile/abnormality/snow_queen/proc/BladeDash(dash_target)
@@ -698,7 +694,7 @@
 				if(isclosedturf(T))
 					continue
 				new /obj/effect/temp_visual/slice(T)
-				hit_mob = HurtInTurf(T, hit_mob, 4, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = FALSE)
+				hit_mob = HurtInTurf(T, hit_mob, 4, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_structure = FALSE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	can_act = TRUE
 	icon_state = "snowqueen"
 	update_icon()

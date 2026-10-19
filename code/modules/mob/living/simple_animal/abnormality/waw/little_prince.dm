@@ -40,6 +40,14 @@
 			Perhaps, we are standing on parallel lines. <br>Perhaps, we were looking at something that can never be reached."),
 	)
 
+	work_start_lines = list("%PERSON can feel tiny spores spewing out of %ABNO.", "%PERSON is feeling a bit hazy because of %ABNO.", "%ABNO appears revolting, yet chanting.")
+	early_work_lines = list("The fox said: \"What is essential is invisible to the eye.\"")
+	middle_work_lines = list("%ABNO came from afar, a place we don't know.", "Perhaps %ABNO is not what we see with our eyes.")
+	late_work_lines = list("The endings of the many employees who were tamed by %ABNO were always tragic.",
+	"All the employees who turned into monsters by %ABNO's spores wander near its Containment Unit.",
+	"Many of our employees who've worked with %ABNO reportedly refused to eat mushroom for a while.")
+	work_end_lines = list("Unlike many of the Abnormalities we have contained, only one employee was responsible for naming %ABNO.", "%PERSON remembers a piece of a star.")
+
 	var/insight_count = 0
 	var/non_insight_count = 0
 	var/list/once = list()
@@ -73,7 +81,7 @@
 /mob/living/simple_animal/hostile/abnormality/little_prince/proc/Hypno(mob/living/carbon/human/user)
 	if (!(user.sanity_lost))
 		playsound(get_turf(user), 'sound/abnormalities/littleprince/Prince_Active.ogg', 50, 0, 2)
-		user.deal_damage(user.maxSanity, WHITE_DAMAGE)
+		user.deal_damage(user.maxSanity, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 		if (!(user.sanity_lost))
 			//Check Sanity twice to make sure you're actually insane
 			twice -= user
@@ -311,7 +319,7 @@
 
 //The Damage Proc
 /obj/effect/prince_mushrooms/proc/DoDamage(mob/living/carbon/human/H)
-	H.deal_damage(rand(1, 3), WHITE_DAMAGE)
+	H.deal_damage(rand(1, 3), WHITE_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 	to_chat(H, span_warning("You feel something weird touching your skin..."))
 	if (H.sanity_lost && connected_abno)
 		connected_abno.Hypno(H)

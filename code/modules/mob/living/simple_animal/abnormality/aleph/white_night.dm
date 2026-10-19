@@ -64,6 +64,14 @@ GLOBAL_LIST_EMPTY(apostles)
 		"Why have you come?" = list(FALSE, "Thy question is empty, I cannot answer"),
 	)
 
+	work_start_lines = list("%PERSON, repented, enters the Containment Unit, following His divine light.", "\"What maketh thee hesitate? I work miracles here.\"")
+	early_work_lines = list("%ABNO looks like a fetus, but it seems as though He needs no nannying.",
+	"When the bell struck twelve, the facility was swallowed by a blinding light. It was the light of redemption for His disciples.")
+	middle_work_lines = list("Only silence fills the air around %ABNO.", "%ABNO absorbs all light and sound which surrounds Him.")
+	late_work_lines = list("%ABNO came here to redeem you and lead the new world.", "%ABNO arrived from the end of the world, and He walks towards the beginning of the new world.")
+	work_end_lines = list("\"%PERSON, why art thou in fear? I shall not leave thee until I have completed my mission.\"",
+	"\"%PERSON, be not frightened. I am thy savior and I shall be with thee.\"", "\"I heard thy cries. Thy heart reached me. %PERSON, thou hath called me.\"")
+
 	var/holy_revival_cooldown
 	var/holy_revival_cooldown_base = 75 SECONDS
 	var/holy_revival_damage = 80 // Pale damage, scales with distance
@@ -172,7 +180,7 @@ GLOBAL_LIST_EMPTY(apostles)
 		playsound(L.loc, 'sound/machines/clockcult/ark_damage.ogg', 50 - attack_range, TRUE, -1)
 		// The farther you are from white night - the less damage it deals
 		var/dealt_damage = max(5, holy_revival_damage - attack_range)
-		L.deal_damage(dealt_damage, PALE_DAMAGE)
+		L.deal_damage(dealt_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 		if(ishuman(L) && dealt_damage > 25)
 			L.emote("scream")
 		to_chat(L, span_userdanger("The holy light... IT BURNS!!"))
@@ -379,7 +387,7 @@ GLOBAL_LIST_EMPTY(apostles)
 	SLEEP_CHECK_DEATH(10)
 	for(var/turf/T in view(scythe_range, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		HurtInTurf(T, list(), scythe_damage, scythe_damage_type, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE)
+		HurtInTurf(T, list(), scythe_damage, scythe_damage_type, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 	playsound(get_turf(src), 'sound/abnormalities/whitenight/scythe_spell.ogg', 75, FALSE, 5)
 	SLEEP_CHECK_DEATH(5)
 	can_act = TRUE
@@ -429,7 +437,7 @@ GLOBAL_LIST_EMPTY(apostles)
 				continue
 			if(faction_check_mob(L))
 				continue
-			L.deal_damage(scythe_damage, scythe_damage_type)
+			L.deal_damage(scythe_damage, scythe_damage_type, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			if(L.stat == DEAD) // Total overkill
 				for(var/i = 1 to 5) // Alternative to gib()
 					new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
@@ -510,7 +518,7 @@ GLOBAL_LIST_EMPTY(apostles)
 	forceMove(T)
 	for(var/turf/TF in view(1, T))
 		new /obj/effect/temp_visual/small_smoke/halfsecond(TF)
-		var/list/new_hits = HurtInTurf(T, been_hit, spear_damage, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE) - been_hit
+		var/list/new_hits = HurtInTurf(T, been_hit, spear_damage, BLACK_DAMAGE, check_faction = TRUE, hurt_mechs = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)) - been_hit
 		been_hit += new_hits
 		for(var/mob/living/L in new_hits)
 			visible_message(span_boldwarning("[src] runs through [L]!"), span_nicegreen("You impaled heretic [L]!"))
@@ -602,7 +610,7 @@ GLOBAL_LIST_EMPTY(apostles)
 			for(var/mob/living/L in AT)
 				if(faction_check_mob(L))
 					continue
-				L.deal_damage(staff_damage, WHITE_DAMAGE)
+				L.deal_damage(staff_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 				if(ishuman(L))
 					var/mob/living/carbon/human/H = L
 					if(H.sanity_lost)

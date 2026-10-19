@@ -61,6 +61,13 @@
 		"Leave him be" = list(FALSE, "Long Bird sees through you, even though he is blind. <br>He is weighing your sins."),
 	)
 
+	work_start_lines = list("There is an old saying: \"Never forget the bird of judgement; no matter how long it takes, it will eventually find you.\"")
+	early_work_lines = list("%ABNO is never in a hurry.", "Perhaps it is already in your house.")
+	middle_work_lines = list("We who live in a world lacking forgiveness offer up our souls as a tribute for redemption.",
+	"People are sly and unable to save their own souls. That is why %ABNO came to us.", "Few realize their own sin. The scale of %ABNO guides them to awareness of this.")
+	work_end_lines = list("%ABNO was once a guardian of the forest. However, it forgot one of the most important things, as it was singleminded in protecting the creatures.",
+	"Now, only darkness reigns over the forest.")
+
 	var/judgement_cooldown = 10 SECONDS
 	var/judgement_cooldown_base = 10 SECONDS
 	var/judgement_damage = 70
@@ -117,7 +124,7 @@
 			var/dist = get_dist(src, L)
 			if(dist > 5)
 				dealt_damage -= (dist - 5) * 5
-			L.deal_damage(dealt_damage, PALE_DAMAGE)
+			L.deal_damage(dealt_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 	else
 		for(var/mob/living/L in urange(judgement_range, src))
@@ -130,7 +137,7 @@
 			var/dist = get_dist(src, L)
 			if(dist > 5)
 				dealt_damage -= (dist - 5) * 5
-			L.deal_damage(dealt_damage, PALE_DAMAGE)
+			L.deal_damage(dealt_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 			if(L.stat == DEAD)	//Gotta fucking check again in case it kills you. Real moment
 				if(!IsCombatMap())
@@ -154,7 +161,7 @@
 			var/dist = get_dist(src, V)
 			if(dist > 5)
 				dealt_damage -= (dist - 5) * 5
-			occupant.deal_damage(dealt_damage, PALE_DAMAGE)
+			occupant.deal_damage(dealt_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 	icon_state = icon_living
 	judging = FALSE

@@ -41,6 +41,12 @@
 		"Set it to 2" = list(FALSE, "You can barely feel a breeze, you just need a little more..."),
 	)
 
+	work_start_lines = list("") // Doesn't currently spawn, will do these later.
+	early_work_lines = list("")
+	middle_work_lines = list("")
+	late_work_lines = list("")
+	work_end_lines = list("")
+
 	var/list/safe = list()
 	var/list/warning = list()
 	var/list/danger = list()
@@ -186,7 +192,7 @@
 		return
 	if(stacks < 10)
 		return
-	owner.deal_damage((stacks / 10), FIRE)
+	owner.deal_damage((stacks / 10), FIRE, attack_type = ATTACK_TYPE_STATUS)
 	owner.playsound_local(owner, 'sound/effects/burn.ogg', 25, TRUE)
 
 /datum/status_effect/stacking/fanhot/on_remove()

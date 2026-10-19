@@ -52,6 +52,12 @@
 		"No" = list(FALSE, "Bah! When will someone worthy arrive?"),
 	)
 
+	work_start_lines = list("Have I ever told you the story of a humble farmer's son who I made a king?", "Rarely do I talk to humans. You should consider it an honor.")
+	early_work_lines = list("%ABNO doesn't appreciate petting, as it deems it as demeaning.",
+	"%ABNO regales %PERSON with its past feats and accomplishments.",
+	"%ABNO's determination of who is worthy seems backwards to %PERSON.", "%PERSON wants to hear more about the pauper who would be king.")
+	late_work_lines = list("Are you ready to claim your inheritance?", "%ABNO claims he can make %PERSON the Director of L-Corp to %PERSON's disbelieiving ears.")
+
 	//Work/misc Vars
 	var/list/stats = list(
 		FORTITUDE_ATTRIBUTE,
@@ -289,10 +295,10 @@
 	icon_state = icon_aggro
 
 /mob/living/simple_animal/hostile/abnormality/puss_in_boots/proc/Finisher(mob/living/target) //This is super easy to avoid
-	target.apply_damage(50, PALE_DAMAGE, null, target.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE) //50% of your health in red damage
+	target.deal_damage(50, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL), blocked = target.run_armor_check(null, RED_DAMAGE)) //50% of your health in red damage
 	to_chat(target, span_danger("[src] is trying to cut you in half!"))
 	if(!ishuman(target))
-		target.deal_damage(50, PALE_DAMAGE)
+		target.deal_damage(100, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL)) //bit more than usual DPS in pale damage
 		return
 	if(target.health > 0)
 		return

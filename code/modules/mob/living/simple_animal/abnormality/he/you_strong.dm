@@ -45,6 +45,9 @@
 		"Enter the machine" = list(TRUE, "I did as instructed and entered; now I have become strong, strong for my City. <br>I love the City I live in."),
 	)
 
+	work_start_lines = list("A mysterious worn-out machine, like a plastic toy model of a factory")
+	middle_work_lines = list("Those who underwent an operation inside the machine have found become strong. \"Do you love your city?\".")
+
 	var/penalize = FALSE
 	var/work_count = 0
 	var/question = FALSE
@@ -111,7 +114,7 @@
 		return FALSE
 	if(!(work_type in list("YES", "NO")) && !question && ..())
 		icon_state = "you_strong_work"
-		return TRUE
+		return ..()
 	if((work_type in list("YES", "NO")) && !question)
 		to_chat(user, span_notice("You have not been prompted."))
 		return FALSE
@@ -320,7 +323,7 @@
 		return
 	gear = clamp(gear + rand(-1, 3), 1, 10)
 	UpdateGear()
-	src.apply_damage(30, BRUTE, null, 0, spread_damage = TRUE)// OOF OUCH MY BONES
+	src.deal_damage(30, BRUTE)// OOF OUCH MY BONES
 	COOLDOWN_START(src, gear_shift, gear_cooldown)
 
 /mob/living/simple_animal/hostile/aminion/grown_strong/death(gibbed)
@@ -362,7 +365,7 @@
 		for(var/mob/living/L in oview(2, src))
 			if(faction_check_mob(L))
 				continue
-			L.apply_damage(melee_damage_lower, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			L.deal_damage(melee_damage_lower, RED_DAMAGE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		playsound(src, 'sound/weapons/ego/strong_charged2.ogg', 60)
 		emote("spin")
 		SLEEP_CHECK_DEATH(5)

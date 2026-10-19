@@ -74,6 +74,11 @@
 		"It's just a tool" = list(FALSE, "I thought it was a tool. <br>Just for that moment."),
 	)
 
+	work_start_lines = list("%PERSON feels an inexplicable flash of fear at the sight of %ABNO.")
+	early_work_lines = list("%PERSON wishes to flee the Containment Unit as soon as possible.", "Seeing that I wasn't amused, it took out another tool.")
+	late_work_lines = list("I thought it was a tool. Just that moment.", "%PERSON cannot recall where, but they're certain they have seen %ABNO before as a child.")
+	work_end_lines = list("Did it just move?")
+
 	del_on_death = FALSE //for explosions
 	var/finishing = FALSE
 	var/step = FALSE
@@ -143,7 +148,7 @@
 					return
 				TH.attack_animal(src)
 				for(var/mob/living/carbon/human/H in ohearers(7, get_turf(src)))
-					H.deal_damage(finishing_small_damage, WHITE_DAMAGE)
+					H.deal_damage(finishing_small_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 				SLEEP_CHECK_DEATH(2)
 			if(!targets_from.Adjacent(TH) || QDELETED(TH))
 				finishing = FALSE
@@ -151,7 +156,7 @@
 			playsound(get_turf(src), 'sound/abnormalities/clownsmiling/final_stab.ogg', 50, 1)
 			TH.gib()
 			for(var/mob/living/carbon/human/H in ohearers(7, get_turf(src)))
-				H.deal_damage(finishing_big_damage, WHITE_DAMAGE)
+				H.deal_damage(finishing_big_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 /mob/living/simple_animal/hostile/abnormality/clown/MoveToTarget(list/possible_targets)
 	if(ranged_cooldown <= world.time)
@@ -205,7 +210,7 @@
 	playsound(get_turf(src), 'sound/abnormalities/clownsmiling/announcedead.ogg', 75, 1)
 	for(var/mob/living/L in view(5, src))
 		if(!faction_check_mob(L))
-			L.deal_damage(10, RED_DAMAGE)
+			L.deal_damage(10, RED_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 			if(IsCombatMap())
 				L.apply_lc_bleed(30)
 	new /obj/effect/particle_effect/foam(get_turf(src))

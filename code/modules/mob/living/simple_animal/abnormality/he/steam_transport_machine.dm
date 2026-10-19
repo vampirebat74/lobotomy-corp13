@@ -70,6 +70,14 @@
 			Seeing it glow a dangerous-looking hue, you quickly escaped the room."),
 	)
 
+	work_start_lines = list("%ABNO stutters to life at %PERSON's approach.")
+	early_work_lines = list("%ABNO's counter advances by one as %PERSON orders it about.", "The smell of steam is overpowering.",
+	"Machines exist for a purpose.", "Humans too exist for a purpose, most never realize it.")
+	late_work_lines = list("A machine must only ever be as a machine.", "%PERSON feels discontentment as %ABNO only ever does as it tells it to do, never what they want.",
+	"A purposeless machine is bound to lose the meaning of its existence, even if it is functional.")
+	work_end_lines = list("In the distant past, machines like these were a common sight.", "%PERSON hurries away as %ABNO's expels a dangerous amounts of steam.",
+	"A machine whose purpose is to do nothing will do whatever it takes to achieve its directive.")
+
 	var/gear = 0
 	var/steam_damage = 2
 	var/steam_venting = FALSE
@@ -180,10 +188,10 @@
 		for(var/mob/living/H in T)
 			if(faction_check_mob(H))
 				continue
-			H.deal_damage(steam_damage, RED_DAMAGE)
+			H.deal_damage(steam_damage, RED_DAMAGE, src, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 	adjustBruteLoss(10) //Take some damage every time steam is vented
 
-/mob/living/simple_animal/hostile/abnormality/steam/apply_damage(damage, damagetype, def_zone, blocked, forced, spread_damage, wound_bonus, bare_wound_bonus, sharpness, white_healable)
+/mob/living/simple_animal/hostile/abnormality/steam/PostDamageReaction(damage_amount, damage_type, source, attack_type)
 	. = ..()
 	if(steam_venting)
 		return

@@ -61,6 +61,11 @@
 			You pull your hand away, but it comes out with the slime. <br>You try to retreat, but you are already caught in her trap. <br>\"Don't betray me, okay?\" <br>Those are the last words you ever hear..."),
 	)
 
+	work_start_lines = list("%ABNO makes those who look at it feel affection without realizing it.")
+	early_work_lines = list("Composed entirely of pink slime, %ABNO is sliding around its Containment Unit.")
+	middle_work_lines = list("If %PERSON feels like they may want to ignore some of the safety and sanitary protocols, it will result in a slimy hell.")
+	work_end_lines = list("Unbeknownst to all, %ABNO's army grows day by day.")
+
 	var/mob/living/carbon/human/gifted_human = null
 	/// Amount of BLACK damage done to all enemies around main target on melee attack. Also includes original target
 	var/radius_damage = 14
@@ -126,7 +131,7 @@
 			var/obj/effect/temp_visual/small_smoke/halfsecond/S = new(T)
 			S.color = "#FF0081"
 			var/list/got_hit = list()
-			got_hit = HurtInTurf(T, got_hit, radius_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE)
+			got_hit = HurtInTurf(T, got_hit, radius_damage, BLACK_DAMAGE, null, TRUE, FALSE, TRUE, attack_type = (ATTACK_TYPE_MELEE))
 			for(var/mob/living/L in got_hit)
 				L.apply_status_effect(STATUS_EFFECT_SLIMED)
 	return ..()
@@ -218,7 +223,7 @@
 /mob/living/simple_animal/hostile/abnormality/melting_love/proc/DissolveGifted(mob/living/carbon/C)
 	to_chat(C, span_userdanger("You feel like you are about to burst!"))
 	C.emote("scream")
-	C.deal_damage(270, BLACK_DAMAGE)
+	C.deal_damage(270, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_STATUS))
 	C.remove_status_effect(STATUS_EFFECT_MELTYLOVE)
 
 /mob/living/simple_animal/hostile/abnormality/melting_love/proc/UnregisterGiftedSignals(mob/living/carbon/human/user)
@@ -327,7 +332,7 @@
 			new /obj/effect/decal/cleanable/melty_slime(R)
 		for(var/mob/living/L in view(death_slime_range, src))
 			if(L.stat != DEAD && !istype(L, /mob/living/simple_animal/hostile/aminion/slime))
-				L.apply_damage(death_damage, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE))
+				L.deal_damage(death_damage, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 	return ..()
 
 /mob/living/simple_animal/hostile/aminion/slime/CanAttack(atom/the_target)
@@ -544,7 +549,7 @@
 	if(!isliving(owner))
 		return
 	var/mob/living/L = owner
-	L.deal_damage(5, BLACK_DAMAGE)
+	L.deal_damage(5, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	owner.playsound_local(owner, 'sound/effects/wounds/sizzle2.ogg', 25, TRUE)
 	if(!ishuman(L))
 		return

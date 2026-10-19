@@ -47,6 +47,10 @@
 			The memory becomes more and more vivid as if its happening now... <br>when you finally break free you cannot recall what you fought so hard for."),
 	)
 
+	work_start_lines = list("%PERSON is surprised with a camera flash from %ABNO.", "Flash photography is not usually permitted by the company.")
+	middle_work_lines = list("%PERSON almost looks inside %ABNO, but hesitates at the last moment.")
+	work_end_lines = list("%ABNO will preserve this moemnt in history, forever and ever.")
+
 	var/minions = 0
 
 /mob/living/simple_animal/hostile/abnormality/better_memories/Login()
@@ -283,10 +287,8 @@
 		var/secondarmor = run_armor_check(null, P.damage_type, "","",P.armour_penetration)
 		var/second_on_hit_state = P.on_hit(src, secondarmor)
 		if(!P.nodamage && second_on_hit_state != BULLET_ACT_BLOCK)
-			apply_damage(P.damage, P.damage_type, null, secondarmor)
+			deal_damage(P.damage, P.damage_type, source = P.firer, attack_type = (ATTACK_TYPE_RANGED), blocked = secondarmor)
 			apply_effects(P.stun, P.knockdown, P.unconscious, P.irradiate, P.slur, P.stutter, P.eyeblur, P.drowsy, secondarmor, P.stamina, P.jitter, P.paralyze, P.immobilize)
-			if(P.firer)
-				RegisterAggroValue(P.firer, P.damage, P.damage_type)
 			//If the projectile had no firer then just list it as nobuddy
 			if(!P.firer)
 				if(target_memory["nobuddy"] > 100)
@@ -363,7 +365,7 @@
 	TemporarySpeedChange(-1, 1.5 SECONDS)
 	fleeing_now = TRUE
 	target_memory.Cut()
-	target = null
+	LoseTarget(FALSE)
 	//Eh whatever make them not instantly patrol again upon reaching their destination.
 	patrol_cooldown = world.time + patrol_cooldown_time
 	if(patrol_to(FleeDest()))
@@ -555,7 +557,7 @@
 	var/mob/living/carbon/human/L = owner
 	if(L.sanity_lost || L.stat == DEAD)
 		qdel(src)
-	L.deal_damage(2, WHITE_DAMAGE)
+	L.deal_damage(2, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	//Unsure if these statements explain what is happening to your character but its enough. -IP
 	to_chat(owner, pick(
 		span_warning("You have trouble recalling your life before this job."),

@@ -69,6 +69,10 @@
 			Soon after, my heart is taken away too. <br>And then there is nothing left."),
 	)
 
+	work_start_lines = list("Rumor has it that %ABNO tells riddles, but it has made no attempt to communicate so far.")
+	middle_work_lines = list("%ABNO's eye remains closed so long as it stays in its cell.")
+	work_end_lines = list("%PERSON's head hurts, suddenly. Just being around %ABNO causes significant mental strain.")
+
 	//work-related
 	var/list/workloot = list(
 		/obj/item/golden_needle,
@@ -272,7 +276,7 @@
 	playsound(get_turf(src), 'sound/effects/ordeals/burgundy/rock_attack.ogg', 50, 0, 8)
 	for(var/turf/T in view(2, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		for(var/mob/living/victim in HurtInTurf(T, list(), quake_damage, WHITE_DAMAGE, null, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE))
+		for(var/mob/living/victim in HurtInTurf(T, list(), quake_damage, WHITE_DAMAGE, null, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, attack_type = (ATTACK_TYPE_SPECIAL)))
 			var/throw_target = get_edge_target_turf(victim, get_dir(victim, get_step_away(victim, src)))
 			if(!victim.anchored)
 				var/throw_velocity = (prob(60) ? 1 : 4)
@@ -479,7 +483,7 @@
 	new /obj/effect/temp_visual/rockattack(target_turf)
 	for(var/turf/T in view(1, src))
 		new /obj/effect/temp_visual/smash_effect(T)
-		for(var/mob/living/L in caster.HurtInTurf(T, list(), damage, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = TRUE, hurt_structure = TRUE))
+		for(var/mob/living/L in caster.HurtInTurf(T, list(), damage, RED_DAMAGE, null, TRUE, FALSE, TRUE, hurt_hidden = TRUE, hurt_structure = TRUE, attack_type = (ATTACK_TYPE_SPECIAL)))
 			if(L.health < 0)
 				L.gib()
 	qdel(src)

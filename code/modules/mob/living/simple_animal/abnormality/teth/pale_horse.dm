@@ -50,6 +50,11 @@
 		"Pretend you didn't get the order" = list(FALSE, "You pretend you didn't get the order and make to leave, your PDA flashes again, you've been assigned to \"Nothing There\" and this time, you're being escorted."),
 	)
 
+	work_start_lines = list("%PERSON knows that if %ABNO sheds a tear, they are sure to die.")
+	early_work_lines = list("%PERSON feels like their grave had been walked upon.", "%ABNO brushes away %PERSON's tears.")
+	middle_work_lines = list("And I looked, and behold a pale horse: and the name that sat upon him was ￭￭￭￭￭, and Hell followed with them.")
+	work_end_lines = list("%ABNO sheds a tear for %PERSON.")
+
 	//teleport
 	var/can_act = TRUE
 	var/teleport_cooldown
@@ -67,6 +72,7 @@
 	return
 
 /mob/living/simple_animal/hostile/abnormality/pale_horse/Worktick(mob/living/carbon/human/user)
+	..()
 	if(user.health < (user.maxHealth * 0.5))
 		return
 	else
@@ -127,7 +133,7 @@
 		for(var/mob/living/H in T)
 			if(faction_check_mob(H))
 				continue
-			H.deal_damage(fog_damage, PALE_DAMAGE)
+			H.deal_damage(fog_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 
 
 /mob/living/simple_animal/hostile/abnormality/pale_horse/Moved() //more damaging fog when moving
@@ -172,7 +178,7 @@
 		for(var/mob/living/H in F)
 			if(faction_check_mob(H))
 				continue
-			H.deal_damage(ash_damage, PALE_DAMAGE)
+			H.deal_damage(ash_damage, PALE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 			if(H.health < 0 && ishuman(H))
 				H.dust(TRUE, TRUE)
 	T.dust(TRUE, TRUE)
@@ -293,7 +299,7 @@
 	icon_state = "mortis"
 
 /datum/status_effect/mortis/tick()
-	owner.deal_damage(damage, PALE_DAMAGE)
+	owner.deal_damage(damage, PALE_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	if(owner.health < 0 && ishuman(owner))
 		owner.dust(TRUE, TRUE)
 

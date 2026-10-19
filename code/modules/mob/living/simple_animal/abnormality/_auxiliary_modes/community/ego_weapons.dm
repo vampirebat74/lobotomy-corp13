@@ -90,6 +90,7 @@
 	successfull_activation = "You scan your surroundings."
 
 /obj/item/ego_weapon/security_ego/ChargeAttack(mob/living/target, mob/living/user)
+	charge_amount -= charge_cost
 	playsound(src, 'sound/machines/click.ogg', 50, TRUE)
 	Scan(user)
 
@@ -194,7 +195,7 @@
 		playsound(T, 'sound/weapons/fixer/generic/fire3.ogg', 30, TRUE, 3)
 		new /obj/effect/temp_visual/smash_effect(T)
 		new /obj/effect/temp_visual/fire/fast(T)
-		been_hit = user.HurtInTurf(T, been_hit, aoe_damage, FIRE, check_faction = TRUE)
+		been_hit = user.HurtInTurf(T, been_hit, aoe_damage, FIRE, check_faction = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 
 /obj/item/ego_weapon/gleaming/get_clamped_volume()
 	return 40
@@ -279,6 +280,7 @@
 		block_cooldown_message = "You rearm your blade."
 		burn_self = 2
 		burn_enemy = 2
+	calculate_resistances_list()
 
 /obj/item/ego_weapon/shield/waxen/proc/Check_Burn(mob/living/user)
 	var/datum/status_effect/stacking/lc_burn/B = user.has_status_effect(/datum/status_effect/stacking/lc_burn)
@@ -316,7 +318,7 @@
 				continue
 			if(special_checks_faction && source.faction_check_mob(L))
 				continue
-			L.apply_damage(10, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			L.deal_damage(10, RED_DAMAGE, source, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_COUNTER))
 			L.apply_lc_burn(2)
 	..()
 
@@ -372,7 +374,7 @@
 				if(L in been_hit || L == user)
 					continue
 				user.visible_message(span_boldwarning("[user] blazes through [L]!"))
-				L.apply_damage((special_damage + extra_damage), RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+				L.deal_damage((special_damage + extra_damage), RED_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 				been_hit += L
 
 	// Remove burn if it's safety is on
@@ -510,7 +512,7 @@
 	for(var/turf/T in view(1, target))
 		var/obj/effect/temp_visual/small_smoke/halfsecond/FX =  new(T)
 		FX.color = "#96BB00"
-		user.HurtInTurf(T, list(), damage_dealt, BLACK_DAMAGE, check_faction = TRUE)
+		user.HurtInTurf(T, list(), damage_dealt, BLACK_DAMAGE, check_faction = TRUE, attack_type = (ATTACK_TYPE_SPECIAL))
 	return
 
 /obj/effect/decal/cleanable/liquid_miasma
@@ -565,7 +567,7 @@
 	if(!isliving(AM))
 		return FALSE
 	var/mob/living/L = AM
-	L.deal_damage(damage_dealt, BLACK_DAMAGE)
+	L.deal_damage(damage_dealt, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_ENVIRONMENT))
 
 /obj/effect/gibspawner/generic/silent/liquid_miasma
 	gibtypes = list(/obj/effect/decal/cleanable/liquid_miasma)
@@ -757,7 +759,7 @@
 				new /obj/effect/nightmares_vis/curse_clock(target_turf)
 
 /obj/item/ego_weapon/ranged/nightmares/attack_self(mob/user)
-	shotsleft = initial(shotsleft)
+	shotsleft = max_shots
 	if(cursing)
 		cursing = FALSE
 		to_chat(user,span_notice("You will no longer attack your cursor."))
@@ -865,7 +867,7 @@
 	UnregisterSignal(owner, COMSIG_ATOM_BULLET_ACT)
 	if(!current_damage)//0 damage stacked
 		return
-	owner.apply_damage(current_damage, BLACK_DAMAGE)
+	owner.deal_damage(current_damage, BLACK_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	new /obj/effect/temp_visual/explosion(get_turf(owner))
 
 /datum/status_effect/display/crash_curse/proc/stack_damage()

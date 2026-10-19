@@ -36,6 +36,12 @@
 			Whether you want it or not, we all know that you have to take it."),
 	)
 
+	work_start_lines = list("%ABNO can hear the time flowing.", "%ABNO is bright green. Sometimes it looks like eyes gazing upon a person.",
+	"It seems light, but it won't budge even if you try to move it with all your might.")
+	middle_work_lines = list("Employee %PERSON's tomorrow might come, or not.", "No one knows who -P, who is mentioned in the phrase in the manual is.")
+	work_end_lines = list("Rumor says that the curse will fall upon you if you hear the thirteenth ring.",
+	"%ABNO is the only being that knows a complete solitude.", "You will need to pay a price, if you want to stop the time.")
+
 	var/meltdown_cooldown_time = 13 MINUTES
 	var/meltdown_cooldown
 	var/worldwide_damage = 70	//If you're unarmored, it obliterates you
@@ -85,7 +91,7 @@
 			continue
 
 		new /obj/effect/temp_visual/thirteen(get_turf(H))	//A visual effect if it hits
-		H.deal_damage(worldwide_damage, PALE_DAMAGE)
+		H.deal_damage(worldwide_damage, PALE_DAMAGE, attack_type = (ATTACK_TYPE_SPECIAL))
 	addtimer(CALLBACK(src, PROC_REF(Reset)), reset_time)
 	return
 

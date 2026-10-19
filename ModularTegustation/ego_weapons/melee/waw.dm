@@ -32,7 +32,7 @@
 	for(var/mob/living/L in hearers(1, target_turf))
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE))
 		new /obj/effect/temp_visual/small_smoke/halfsecond(get_turf(L))
 
 
@@ -201,7 +201,7 @@
 	if(mode)
 		if(M in targets)
 			playsound(M, 'sound/weapons/fixer/generic/nail1.ogg', 100, FALSE, 4)
-			M.apply_damage(ranged_damage, WHITE_DAMAGE, null, M.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+			M.deal_damage(ranged_damage, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_SPECIAL))
 			new /obj/effect/temp_visual/remorse(get_turf(M))
 			targets -= M
 	..()
@@ -323,7 +323,7 @@
 			if(special_checks_faction && user.faction_check_mob(L))
 				continue
 			to_chat(L, span_userdanger("You are hit by [src]!"))
-			L.apply_damage(dealing_damage, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE))
+			L.deal_damage(dealing_damage, RED_DAMAGE, user, attack_type = (ATTACK_TYPE_RANGED))
 			new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(L), pick(GLOB.alldirs))
 			dealing_damage = max(dealing_damage * 0.9, special_damage * 0.3)
 
@@ -336,7 +336,8 @@
 	righthand_file = 'icons/mob/inhands/96x96_righthand.dmi'
 	inhand_x_dimension = 96
 	inhand_y_dimension = 96
-	force = 20
+	force = 13
+	attack_speed = 0.8
 	swingstyle = WEAPONSWING_LARGESWEEP
 	damtype = PALE_DAMAGE
 	attack_verb_continuous = list("cuts", "attacks", "slashes")
@@ -345,24 +346,20 @@
 	attribute_requirements = list(
 							JUSTICE_ATTRIBUTE = 80
 							)
-	var/combo = 0
-	var/combo_time
-	var/combo_wait = 3 SECONDS
+	var/attack_count = 0
 
-//On the 13th hit, Deals user justice x 2
+//On the 13th hit, Deals user justice
 /obj/item/ego_weapon/thirteen/attack(mob/living/M, mob/living/user)
 	if(!CanUseEgo(user))
 		return
-	if(world.time > combo_time)
-		combo = 0
-	combo_time = world.time + combo_wait
-	if(combo >= 13)
-		combo = 0
+	if(!(M.status_flags & GODMODE) && M.stat != DEAD)
+		attack_count++
+	if(attack_count >= 13)
+		attack_count = 0
 		force = get_modified_attribute_level(user, JUSTICE_ATTRIBUTE)
 		new /obj/effect/temp_visual/thirteen(get_turf(M))
 		playsound(src, 'sound/weapons/ego/price_of_silence.ogg', 25, FALSE, 9)
 	..()
-	combo += 1
 	force = initial(force)
 
 
@@ -432,7 +429,7 @@
 				if(user.faction_check_mob(C) && !vine_damage_bonus)
 					continue
 				new /obj/effect/temp_visual/vinespike(get_turf(C))
-				C.apply_damage(vine_damage + vine_damage_bonus, BLACK_DAMAGE, null, C.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+				C.deal_damage(vine_damage + vine_damage_bonus, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_SPECIAL))
 				affected_mobs += 1
 			playsound(loc, 'sound/creatures/venus_trap_hurt.ogg', min(75, affected_mobs * 15), TRUE, round( affected_mobs * 0.5))
 		AlterMoveResist(user, 0.4)
@@ -449,46 +446,6 @@
 	if(!M || !num)
 		return
 	M.move_resist *= num
-
-/obj/item/ego_weapon/ebony_stem
-	name = "ebony stem"
-	desc = "An apple does not culminate when it ripens to bright red; \
-	only when the apple shrivels up and attracts lowly creatures."
-	special = "This weapon has a ranged attack."
-	icon_state = "ebony_stem"
-	force = 24
-	damtype = BLACK_DAMAGE
-	swingstyle = WEAPONSWING_THRUST
-	attack_verb_continuous = list("admonishes", "rectifies", "conquers")
-	attack_verb_simple = list("admonish", "rectify", "conquer")
-	hitsound = 'sound/weapons/ego/rapier2.ogg'
-	attribute_requirements = list(
-							PRUDENCE_ATTRIBUTE = 60,
-							JUSTICE_ATTRIBUTE = 60
-							)
-	var/ranged_cooldown
-	var/ranged_cooldown_time = 1.2 SECONDS
-	var/ranged_damage = 20
-
-/obj/item/ego_weapon/ebony_stem/afterattack(atom/A, mob/living/user, proximity_flag, params)
-	if(ranged_cooldown > world.time)
-		to_chat(user, "<span class='warning'>Your ranged attack is still recharging!")
-		return
-	if(!CanUseEgo(user))
-		return
-	var/turf/target_turf = get_turf(A)
-	if(!istype(target_turf))
-		return
-	if((get_dist(user, target_turf) < 2) || !(target_turf in view(10, user)))
-		return
-	..()
-	ranged_cooldown = world.time + ranged_cooldown_time
-	if(do_after(user, 5))
-		var/damage_dealt = (ranged_damage * force_multiplier)
-		playsound(target_turf, 'sound/abnormalities/ebonyqueen/attack.ogg', 50, TRUE)
-		for(var/turf/open/T in RANGE_TURFS(1, target_turf))
-			new /obj/effect/temp_visual/thornspike(T)
-			user.HurtInTurf(T, list(), damage_dealt, BLACK_DAMAGE, hurt_mechs = TRUE)
 
 /obj/item/ego_weapon/wings // Is this overcomplicated? Yes. But I'm finally happy with what I want to make of this weapon.
 	name = "torn off wings"
@@ -595,7 +552,7 @@
 			var/mob/living/carbon/human/H = L
 			if(!H.sanity_lost)
 				continue
-		L.apply_damage(aoe, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		L.visible_message(span_danger("[user] slices [L]!"))
 
 /obj/item/ego_weapon/wings/proc/Leap(mob/living/user, dir = SOUTH, times_ran = 3)
@@ -622,7 +579,7 @@
 					var/mob/living/carbon/human/H = L
 					if(!H.sanity_lost)
 						continue
-				L.apply_damage(aoe, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+				L.deal_damage(aoe, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 				L.visible_message(span_danger("[user] evicerates [L]!"))
 		return
 	for(var/turf/T in orange(1, user))
@@ -799,7 +756,7 @@
 	attack_verb_simple = list("bash", "whap", "beat", "prod", "poke")
 	hitsound = 'sound/weapons/fixer/generic/spear1.ogg'
 	reductions = list(40, 30, 50, 30) // 150
-	projectile_block_duration = 1 SECONDS
+	projectile_block_duration = 0.5 SECONDS
 	block_duration = 3 SECONDS // Exempt from normal reduction due to block restriction.
 	block_cooldown = 3 SECONDS
 	block_sound = 'sound/weapons/ego/clash1.ogg'
@@ -809,18 +766,13 @@
 							PRUDENCE_ATTRIBUTE = 80
 							)
 	var/close_cooldown
-	var/close_cooldown_time = 6 SECONDS
 	var/reflect_cooldown
 	var/reflect_cooldown_time = 1 //need to prevent simultaneous hits; bullets overlapping is very bad.
 
-/obj/item/ego_weapon/shield/swan/attack_self(mob/user)
-	if(close_cooldown > world.time) //prevents shield usage with no DPS loss
-		to_chat(user,span_warning("You cannot use this again so soon!"))
-		return
+/obj/item/ego_weapon/shield/swan/EnableBlock(mob/living/carbon/human/user)
 	if(do_after(user, 4, src))
 		icon_state = "swan"
-		close_cooldown = world.time + close_cooldown_time
-		..()
+		. = ..()
 	user.update_inv_hands()
 
 /obj/item/ego_weapon/shield/swan/DisableBlock(mob/living/carbon/human/user)
@@ -830,33 +782,30 @@
 	user.update_inv_hands()
 	return
 
-/obj/item/ego_weapon/shield/swan/AnnounceBlock(mob/living/carbon/human/source, damage, damagetype, def_zone)
+/obj/item/ego_weapon/shield/swan/AnnounceBlock(mob/living/carbon/human/source, damage, damagetype, def_zone, mob/attacker, damage_flags, attack_type)
 	. = ..()
-	INVOKE_ASYNC(src, PROC_REF(Reflect), source, damage)
+	if(damage <= 0 || source == attacker || !isliving(attacker) || (attack_type & (ATTACK_TYPE_COUNTER | ATTACK_TYPE_ENVIRONMENT | ATTACK_TYPE_STATUS)))
+		return
+	if(!(attacker in livinginview(8, source)))
+		return
+	INVOKE_ASYNC(src, PROC_REF(Reflect), source, attacker)
 
-/obj/item/ego_weapon/shield/swan/proc/Reflect(mob/living/carbon/human/user, damage, damagetype, def_zone)
+/obj/item/ego_weapon/shield/swan/proc/Reflect(mob/living/carbon/human/user, mob/living/attacker)
 	if(!block)
 		return
 	if(reflect_cooldown > world.time)
 		return
-	reflect_cooldown = world.time + reflect_cooldown_time
 	var/turf/proj_turf = user.loc
 	if(!isturf(proj_turf))
 		return
-	var/list/mob_list = list()
-	for(var/mob/living/simple_animal/hostile/H in livinginview(8, user))
-		mob_list += H
-	if(!mob_list.len)
-		return
-	var/mob/living/simple_animal/hostile/target = pick(mob_list)
+	reflect_cooldown = world.time + reflect_cooldown_time
 	var/obj/projectile/ego_bullet/swan/S = new /obj/projectile/ego_bullet/swan(proj_turf)
 	S.fired_from = src //for signal check
 	playsound(user, 'sound/weapons/resonator_blast.ogg', 30, TRUE)
 	S.firer = user
-	S.preparePixelProjectile(target, user)
+	S.preparePixelProjectile(attacker, user)
 	S.fire()
 	S.damage *= force_multiplier
-	return
 
 /obj/item/ego_weapon/shield/swan/Initialize()
 	RegisterSignal(src, COMSIG_PROJECTILE_ON_HIT, PROC_REF(projectile_hit))
@@ -973,8 +922,7 @@
 		return FALSE
 	if(isliving(target))
 		var/mob/living/simple_animal/M = target
-		if(!ishuman(M) && !M.has_status_effect(/datum/status_effect/display/rend/white))
-			new /obj/effect/temp_visual/cult/sparks(get_turf(M))
+		if(!ishuman(M))
 			M.apply_status_effect(/datum/status_effect/display/rend/white)
 
 // Reworked to use the bloodfeast component. Collect blood to improve your life leech ability.
@@ -1033,7 +981,7 @@
 	if(!siphoning)
 		return
 	var/datum/component/bloodfeast/bloodfeast = GetComponent(/datum/component/bloodfeast)
-	AdjustThirst(-10)
+	AdjustThirst(-30)
 	if(bloodfeast.blood_amount < 1)
 		siphoning = FALSE
 		filters = null
@@ -1065,7 +1013,7 @@
 	desc = "Look on my Works, ye Mighty, and despair!"
 	special = "This weapon can remove petrification."
 	icon_state = "pharaoh"
-	force = 12
+	force = 11
 	attack_speed = 0.5
 	swingstyle = WEAPONSWING_LARGESWEEP
 	damtype = WHITE_DAMAGE
@@ -1145,8 +1093,8 @@
 		var/obj/effect/temp_visual/small_smoke/halfsecond/smonk = new(T)
 		smonk.color = COLOR_GREEN
 		var/list/been_hit = QDELETED(M) ? list() : list(M)
-		user.HurtInTurf(T, been_hit, damage, damtype, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE)
-		user.HurtInTurf(T, list(), damage, aoe_damage_type, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE)
+		user.HurtInTurf(T, been_hit, damage, damtype, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
+		user.HurtInTurf(T, list(), damage, aoe_damage_type, hurt_mechs = TRUE, hurt_structure = TRUE, break_not_destroy = TRUE, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		if(prob(5))
 			new /obj/effect/gibspawner/generic/silent/wrath_acid(T) // The non-damaging one
 	var/mob/living/carbon/human/myman = user
@@ -1196,11 +1144,9 @@
 	inhand_x_dimension = 64
 	inhand_y_dimension = 64
 	force = 20
-	swingstyle = WEAPONSWING_LARGESWEEP
 	damtype = WHITE_DAMAGE
-	attack_verb_continuous = list("slices", "cuts")
-	attack_verb_simple = list("slice", "cut")
-	hitsound = 'sound/weapons/blade1.ogg'
+	attack_verb_continuous = list("slams", "strikes", "smashes")
+	attack_verb_simple = list("slam", "strike", "smash")
 	attribute_requirements = list(FORTITUDE_ATTRIBUTE = 80)
 
 /obj/item/ego_weapon/diffraction/attack(mob/living/target, mob/living/user)
@@ -1265,7 +1211,7 @@
 	var/modified_damage = mark_damage
 	modified_damage *= justicemod
 	modified_damage *= force_multiplier
-	target.apply_damage(modified_damage, damage_color, null, target.run_armor_check(null, damage_color), spread_damage = TRUE)		//MASSIVE fuckoff punch
+	target.deal_damage(mark_damage, damage_color, user, flags = (DAMAGE_UNTRACKABLE), attack_type = (ATTACK_TYPE_SPECIAL))		//MASSIVE fuckoff punch
 	playsound(loc, 'sound/weapons/fixer/generic/energyfinisher3.ogg', 15, TRUE, extrarange = stealthy_audio ? SILENCED_SOUND_EXTRARANGE : -1, falloff_distance = 0)
 	new /obj/effect/temp_visual/dir_setting/bloodsplatter(get_turf(target), pick(GLOB.alldirs))
 
@@ -1324,7 +1270,7 @@
 		for(var/mob/living/L in range(2, user)) //knocks enemies away from you
 			if(L == user || ishuman(L))
 				continue
-			L.apply_damage(aoe, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			L.deal_damage(aoe, RED_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			if(firsthit)
 				aoe = (aoe / 2)
 				firsthit = FALSE
@@ -1338,7 +1284,7 @@
 	name = "discord"
 	desc = "The existence of evil proves the existence of good, just as light proves the existence of darkness."
 	special = "This weapon attacks thrice in rapid succession when being wielded.\n \
-		Attacks with this weapon will heal a nearby ally using Assonance."
+		Attacks with this weapon will heal a nearby ally using Accord."
 	icon_state = "discord"
 	force = 19
 	wielded_force = 22
@@ -1381,8 +1327,8 @@
 	if(wielded)
 		heal_amount = 3
 	for(var/mob/living/carbon/human/Yang in view(7, user))
-		var/obj/item/ego_weapon/ranged/assonance/A = Yang.get_active_held_item()
-		if(istype(A, /obj/item/ego_weapon/ranged/assonance))
+		var/obj/item/ego_weapon/ranged/accord/A = Yang.get_active_held_item()
+		if(istype(A, /obj/item/ego_weapon/ranged/accord))
 			if(!A.CanUseEgo(Yang))
 				continue
 			Yang.adjustBruteLoss(-heal_amount)
@@ -1393,7 +1339,7 @@
 	name = "innocence"
 	desc = "But why is it about ‘innocence’? After countless assumptions and careful research, we learned that it could be defined as \[REDACTED\]."
 	icon_state = "innocence"
-	force = 68
+	force = 60
 	damtype = WHITE_DAMAGE
 	attack_verb_continuous = list("shoves", "bashes")
 	attack_verb_simple = list("shove", "bash")
@@ -1493,7 +1439,7 @@
 		aoe*=force_multiplier
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, RED_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 		var/obj/effect/temp_visual/small_smoke/halfsecond/FX =  new(get_turf(L))
 		FX.color = "#a2d2df"
 
@@ -1790,7 +1736,7 @@
 		aoe*=justicemod
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL))
 		new /obj/effect/temp_visual/tbirdlightning(get_turf(L))
 	icon_state = initial(icon_state)
 	hitsound = initial(hitsound)
@@ -1849,17 +1795,17 @@
 	force = 28
 	switch(chosen_style)
 		if("red")
-			user.apply_damage(50, RED_DAMAGE, null, user.run_armor_check(null, RED_DAMAGE), spread_damage = TRUE)
+			user.deal_damage(30, RED_DAMAGE)
 			damtype = RED_DAMAGE
 			to_chat(user, span_notice("Your bones are painfully sculpted to fit a muscular claw."))
 			hitsound = 'sound/weapons/bladeslice.ogg'
 		if("white")
-			user.apply_damage(50, WHITE_DAMAGE, null, user.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+			user.deal_damage(30, WHITE_DAMAGE)
 			damtype = WHITE_DAMAGE
 			to_chat(user, span_notice("Your angst is plastered onto your arm."))
 			hitsound = 'sound/effects/hit_kick.ogg'
 		if("black")
-			user.apply_damage(50, BLACK_DAMAGE, null, user.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+			user.deal_damage(30, BLACK_DAMAGE)
 			damtype = BLACK_DAMAGE
 			to_chat(user, span_notice("Bristles are painfully ejected from your arm, filled with hate."))
 			hitsound = 'sound/weapons/ego/spear1.ogg'
@@ -2073,7 +2019,7 @@
 				smonk.color = COLOR_TEAL
 				if(!ismob(thrownby))
 					continue
-				thrownby.HurtInTurf(T, list(thrownby), damage, RED_DAMAGE)
+				thrownby.HurtInTurf(T, list(thrownby), damage, RED_DAMAGE, attack_type = (ATTACK_TYPE_RANGED | ATTACK_TYPE_SPECIAL))
 			PowerReset(thrownby)
 
 /datum/movespeed_modifier/anchor
@@ -2184,7 +2130,7 @@
 		aoe*=force_multiplier
 		if(L == user || ishuman(L))
 			continue
-		L.apply_damage(aoe, BLACK_DAMAGE, null, L.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+		L.deal_damage(aoe, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 
 /obj/item/ego_weapon/abyssal_route/proc/DiveReset()
 	can_attack = TRUE
@@ -2316,7 +2262,7 @@
 				for(var/mob/living/L in T)
 					if(L == user || ishuman(L))
 						continue
-					L.apply_damage(aoe, WHITE_DAMAGE, null, L.run_armor_check(null, WHITE_DAMAGE), spread_damage = TRUE)
+					L.deal_damage(aoe, WHITE_DAMAGE, user, attack_type = (ATTACK_TYPE_MELEE | ATTACK_TYPE_SPECIAL))
 			sleep(1.5)
 
 /obj/item/ego_weapon/sunyata/proc/spin_reset()
@@ -2405,7 +2351,7 @@
 	. = ..()
 	for(var/mob/living/victim in orange(2, src))
 		if(faction_check(victim.faction, owner.faction))
-			victim.deal_damage(5, WHITE_DAMAGE)
+			victim.deal_damage(5, WHITE_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))
 	if(prob(40))
 		playsound(owner, 'sound/abnormalities/ambling pearl/goo effect.ogg', 40)
 
@@ -2465,7 +2411,7 @@
 	if(mode)
 		if(M in targets)
 			playsound(M, 'sound/abnormalities/spiral_contempt/spiral_bleed.ogg', 100, FALSE, 4)
-			M.apply_damage(ranged_damage, BLACK_DAMAGE, null, M.run_armor_check(null, BLACK_DAMAGE), spread_damage = TRUE)
+			M.deal_damage(ranged_damage, BLACK_DAMAGE, user, attack_type = (ATTACK_TYPE_RANGED))
 			new /obj/effect/temp_visual/contempt_blood(get_turf(M))
 			targets -= M
 	..()
@@ -2513,5 +2459,5 @@
 		return
 	var/justicemod = get_attack_multiplier(user)
 	var/damage = force * justicemod * force_multiplier * 0.5
-	target.apply_damage(damage, FIRE, null, target.run_armor_check(null, FIRE), spread_damage = TRUE)
+	target.deal_damage(damage, FIRE, src, attack_type = (ATTACK_TYPE_MELEE))
 	target.apply_lc_burn(3)

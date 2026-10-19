@@ -26,6 +26,7 @@
 	work_damage_type = list(WHITE_DAMAGE, BLACK_DAMAGE)
 	chem_type = /datum/reagent/abnormality/sin/gluttony	//Literally a black hole (and a white hole I guess)
 
+	can_spawn = FALSE // Pending projectile fix
 	ego_list = list(
 		/datum/ego_datum/weapon/space,
 		/datum/ego_datum/armor/space,
@@ -48,6 +49,10 @@
 			Should you conquer its trials, they say, you can find the book that will grant the answers to whatever it is you seek. <br>\
 			Black feathers and regret..."),
 	)
+
+	work_start_lines = list("One day, %ABNO fell out of the sky.", "%ABNO appeared seemingly out of nowhere, once upon a time.", "%PERSON knows almost nothing about the %ABNO.")
+	middle_work_lines = list("%PERSON wonders what lies beyond the stars.", "%ABNO does not understand humans, and is beyond comprehension by humankind.")
+	work_end_lines = list("One day, %ABNO will return to a place above the stars.", "%PERSON can't look directly at %ABNO without feeling strange.")
 
 	var/explosion_timer = 2 SECONDS
 	var/explosion_state = 3
@@ -118,12 +123,12 @@
 			continue
 		new /obj/effect/temp_visual/revenant(T)
 		for(var/mob/living/carbon/human/L in T)
-			L.deal_damage(explosion_damage, BLACK_DAMAGE)
+			L.deal_damage(explosion_damage, BLACK_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 	SLEEP_CHECK_DEATH(10)	//I kinda want it to be a bit of a delay but not too much
 
 	//White Hole effect
 	for(var/mob/living/carbon/human/L in view(14, src))
-		L.deal_damage(explosion_damage, WHITE_DAMAGE)
+		L.deal_damage(explosion_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 	goonchem_vortex(get_turf(src), 1, 13)
 	can_act = TRUE
 	Teleport()
@@ -152,7 +157,7 @@
 				been_hit += L
 				if(L.sanity_lost)					//DIE FOOL. LADY BLAST
 					L.dust(TRUE, TRUE)
-				L.deal_damage(negative_damage, WHITE_DAMAGE)
+				L.deal_damage(negative_damage, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 			all_turfs -= T
 		negative_damage += negative_damage_scale//Every tile it traves it does 10 more damage up to 120
 		SLEEP_CHECK_DEATH(3)
@@ -241,7 +246,7 @@
 		animate(user, transform = user.transform*0.01, time = 5)
 		user.death(TRUE)
 		QDEL_IN(user, 5)
-	return TRUE
+	return ..()
 
 /mob/living/simple_animal/hostile/abnormality/space_lady/FailureEffect(mob/living/carbon/human/user, work_type, pe)
 	. = ..()
@@ -281,7 +286,7 @@
 			continue
 		new /obj/effect/temp_visual/revenant(T)
 		for(var/mob/living/carbon/human/L in T)
-			L.deal_damage(30, WHITE_DAMAGE)
+			L.deal_damage(30, WHITE_DAMAGE, src, attack_type = (ATTACK_TYPE_SPECIAL))
 
 
 /obj/projectile/black_hole
@@ -300,7 +305,7 @@
 			continue
 		new /obj/effect/temp_visual/revenant(T)
 		for(var/mob/living/carbon/human/L in T)
-			L.deal_damage(30, BLACK_DAMAGE)
+			L.deal_damage(30, BLACK_DAMAGE, source = firer, attack_type = (ATTACK_TYPE_SPECIAL | ATTACK_TYPE_RANGED))
 
 /obj/projectile/loos_bullet
 	name = "white beam"

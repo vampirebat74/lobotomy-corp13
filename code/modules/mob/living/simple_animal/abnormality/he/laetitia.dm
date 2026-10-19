@@ -43,6 +43,13 @@
 			You look lonely too, I hope my present will make you laugh as well!"),
 	)
 
+	work_start_lines = list("%ABNO, who is a very shy girl, may just give %PERSON a personally prepared surprise present in secret.",
+	"%ABNO comes from a place far far away and enjoys jolly laughter.")
+	early_work_lines = list("%ABNO really likes having friends.", "She really hopes that %PERSON will be happy with her heartfelt gift.")
+	late_work_lines = list("Imagining the great surprise the gift will bring to %PERSON's face, %ABNO looks at them happily.",
+	"It would be wonderful if people accept this small but precious gift.")
+	work_end_lines = list("%ABNO's \"friend\" is asleep inside her present, waiting for the receiver.", "%PERSON has no idea what is inside the gift shaped like a cute lil' heart.")
+
 	attack_action_types = list(/datum/action/cooldown/laetitia_gift, /datum/action/cooldown/laetitia_summon)
 	var/breaching = FALSE
 	var/summon_cooldown
@@ -137,10 +144,10 @@
 		playsound(get_turf(src), 'sound/abnormalities/laetitia/spider_born.ogg', 50, 1)
 		if (istype(user, /mob/living))
 			var/mob/living/L = user
-			L.apply_damage((basepower*strength), RED_DAMAGE, null, L.run_armor_check(null, RED_DAMAGE), FALSE, TRUE)
+			L.deal_damage((basepower*strength), RED_DAMAGE)
 		for(var/turf/T in range(2, user))
 			new /obj/effect/temp_visual/smash_effect(T)
-			user.HurtInTurf(T, list(), (basepower*strength), RED_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE)
+			user.HurtInTurf(T, list(), (basepower*strength), RED_DAMAGE, check_faction = FALSE, hurt_mechs = TRUE, flags = (DAMAGE_UNTRACKABLE))
 		to_chat(user, "You opened the gift!")
 		qdel(src)
 	opening = FALSE
@@ -291,7 +298,7 @@
 	var/atom/throw_target = get_edge_target_turf(status_holder, rand_dir)
 	if(!status_holder.anchored)
 		status_holder.throw_at(throw_target, rand(1, 3), 7, status_holder)
-	status_holder.deal_damage(50, RED_DAMAGE)//Usually a kill, you can block it if you're good
+	status_holder.deal_damage(50, RED_DAMAGE, attack_type = (ATTACK_TYPE_STATUS))//Usually a kill, you can block it if you're good
 
 /datum/status_effect/pranked/proc/TriggerPrank()
 	//immediately set to 10 seconds, don't shorten if less than 10 seconds remaining

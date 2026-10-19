@@ -562,7 +562,7 @@
 	threat_level = TETH_LEVEL
 
 /mob/living/simple_animal/hostile/sailor/pro
-	name = "Eight Association Fixer"
+	name = "Eight Association Sailor"
 	desc = "A representative of the Eight Association, masters of all things nautical."
 	threat_level = WAW_LEVEL
 	/datum/outfit/job/civilian

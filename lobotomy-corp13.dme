@@ -4304,6 +4304,7 @@
 #include "ModularTegustation\tegu_items\disciplinary\combat_page\level1.dm"
 #include "ModularTegustation\tegu_items\disciplinary\combat_page\level2.dm"
 #include "ModularTegustation\tegu_items\disciplinary\combat_page\level3.dm"
+#include "ModularTegustation\tegu_items\enkephalin_rush\boat_shop.dm"
 #include "ModularTegustation\tegu_items\enkephalin_rush\enkr_corpses.dm"
 #include "ModularTegustation\tegu_items\enkephalin_rush\enkr_machines.dm"
 #include "ModularTegustation\tegu_items\enkephalin_rush\enkr_mobs.dm"

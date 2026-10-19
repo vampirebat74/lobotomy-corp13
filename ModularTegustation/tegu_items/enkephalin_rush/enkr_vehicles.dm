@@ -12,6 +12,7 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	var/mob/living/driver
 	var/obj/structure/boat_interior/interior
 	var/datum/sailor/my_sailor
+	var/mob/living/captain
 	max_occupants = 1
 
 /obj/vehicle/sealed/adventure_boat/Initialize()
@@ -67,12 +68,15 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 
 /obj/vehicle/sealed/adventure_boat/say(message as text, language, ignore_spam, forced, sanitize, spans)
 	if(!my_sailor)//The boat should generally not speak without a sailor present
-		return ..()
+		return
+	var/former_name = name
 	name = my_sailor.name
 	..()
-	name = initial(name)
+	name = former_name
 
 /obj/vehicle/sealed/adventure_boat/proc/AddSailor(datum/sailor/D)
+	if(my_sailor)
+		qdel(my_sailor)
 	my_sailor = D
 	var/spawned = FALSE
 	for(var/turf/T in shipturfs)
@@ -85,6 +89,20 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	if(!spawned)
 		to_chat(world, "AddSailor on [D] has failed to activate. Check if the landmark has been found.")
 
+/obj/vehicle/sealed/adventure_boat/proc/CheckCaptain(mob/living/carbon/user)
+	if(!captain)
+		captain = user
+		var/new_name = input(user,"Type a new name for your ship","Name the ship")
+		if(new_name)
+			name = new_name
+		to_chat(user, "You claim the [name] as its new captain.")
+		return TRUE
+	if(captain.stat == DEAD)
+		captain = null
+	if(user != captain)
+		return FALSE
+	return TRUE
+
 /obj/vehicle/sealed/adventure_boat/skiff
 	name = "skiff"
 	desc = "A small vessel popularized by the fixer of the great lake. Experienced sailors use it to hunt massive whales."
@@ -95,63 +113,64 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 /obj/vehicle/sealed/adventure_boat/sloop
 	name = "sloop"
 	desc = "A larger vessel that serves as a generalist when navigating throughout the Great Lake."
-	//icon_state = "sloop"
+	icon = 'ModularTegustation/Teguicons/64x48.dmi'
+	icon_state = "longboat"
 	max_occupants = 4
 
-//*** Boat Shop Stuff ***// Consider moving this to a separate file
+//SAILOR DATUMS// These are very similar to abnormality datums
 
-/obj/structure/boat_shop
-	name = "boat shop"
-	desc = "A place to buy boats"
-	icon = 'icons/obj/vending.dmi'
-	icon_state = "liberationstation"
-	anchored = TRUE
-	density = TRUE
-	var/list/dock = list()
-	var/list/current_boats = list()
-	var/obj/vehicle/sealed/adventure_boat/picked_type
+/datum/sailor
+	var/name = "Sailor"
+	/// We'll use abnormality risk levels as a comparable metric for its tier
+	var/threat_level = ZAYIN_LEVEL
+	var/mob/living/simple_animal/hostile/sailor/mob_path
+	/// Reference to current mob, if alive
+	var/mob/living/simple_animal/hostile/sailor/current
+	/// Reference to respawn landmark
+	var/obj/effect/landmark/sailor_spawn/landmark
 
-/obj/structure/boat_shop/attack_hand(mob/living/carbon/human/user)
-	if(!LAZYLEN(dock))
-		for(var/obj/effect/boatspawn/B in range(8, src))
-			dock += B
-		say("Calibration complete. Please try again.")
+/datum/sailor/noob
+	mob_path = /mob/living/simple_animal/hostile/sailor/noob
+
+/datum/sailor/basic
+	mob_path = /mob/living/simple_animal/hostile/sailor/basic
+	threat_level = TETH_LEVEL
+
+/datum/sailor/pro
+	mob_path = /mob/living/simple_animal/hostile/sailor/pro
+	threat_level = WAW_LEVEL
+
+/datum/sailor/New(obj/effect/landmark/sailor_spawn/new_landmark)
+	if(!new_landmark)
+		CRASH("Sailor datum was created without reference to landmark.")
+	if(!ispath(mob_path))
+		CRASH("Sailor datum was created without a path to the mob.")
+	landmark = new_landmark
+	name = initial(mob_path.name)
+	to_chat(world, "Sailor datum has been created with mob path [mob_path]. Calling RespawnMob()!")
+
+/datum/sailor/proc/RespawnMob()//doesn't work
+	if(!istype(landmark))
+		CRASH("Couldn't respawn an sailor [initial(mob_path.name)] due to missing landmark.")
+	if(!ispath(mob_path))
+		CRASH("Sailor tried to respawn a mob, but mob path wasn't valid.")
+	if(istype(current))
+		to_chat(world, "sailor failed istype() check")//debug text
 		return
+	var/turf/T = get_turf(landmark)
+	current = new mob_path(T)
+	to_chat(world, "Creating sailor mob [current] at landmark located at [T]")//debug text
+	current.datum_reference = src
+	current.setDir(WEST)
+	name = current.name
 
-	if(!LAZYLEN(GLOB.lobotomy_boats))
-		say("There are too many boats at sea! Try later.")
-	else
-		say("Enjoy your free boat trial!")
-		var/obj/effect/T = pick(dock)
-		picked_type = new(get_turf(T))
-		current_boats += picked_type
+/datum/sailor/Destroy()
+	if(current)
+		qdel(current)
+	landmark = null
+	..()
 
-/obj/structure/boat_shop/ui_interact(mob/user, datum/tgui/ui)
-	ui = SStgui.try_update_ui(user, src, ui)
-	if(!ui)
-		ui = new(user, src, "Boat Shop", name)
-		ui.set_autoupdate(FALSE)
-		ui.open()
-
-/obj/structure/boat_shop/ui_data(mob/user)
-	. = list()
-
-	var/listofitems = list()
-	for (var/I in current_boats)
-		var/atom/movable/O = I
-		if (!QDELETED(O))
-			var/md5name = md5(O.name) // This needs to happen because of a bug in a TGUI component, https://github.com/ractivejs/ractive/issues/744
-			if (listofitems[md5name]) // which is fixed in a version we cannot use due to ie8 incompatibility
-				listofitems[md5name]["amount"]++ // The good news is, #30519 made smartfridge UIs non-auto-updating
-			else
-				listofitems[md5name] = list("name" = O.name, "type" = O.type, "amount" = 1)
-	sortList(listofitems)
-
-	.["contents"] = listofitems
-	.["name"] = name
-
-/obj/structure/boat_shop/handle_atom_del(atom/A) // Update the UIs in case something inside gets deleted
-	SStgui.update_uis(src)
+//Misc objects
 
 /obj/effect/boatspawn
 	icon = 'icons/mob/landmarks.dmi'
@@ -161,10 +180,12 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 
 /obj/structure/boat_interior
 	name = "to surface"
-	desc = "A ladder leading to the top deck.."
+	desc = "A ladder leading to the top deck."
 	icon = 'icons/obj/structures.dmi'
 	icon_state = "ladder10"
 	var/obj/vehicle/sealed/adventure_boat/current_vessel
+	var/datum/sailor/current_sailor
+	var/mob_path = /mob/living/simple_animal/hostile/sailor
 
 /obj/structure/boat_interior/Initialize(mapload)
 	GLOB.lobotomy_boats += src
@@ -176,68 +197,3 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 		user.forceMove(current_vessel)
 	else
 		user.forceMove(locate(128, 4, 7))//un-hardcode this
-
-//SAILOR DATUMS// These are very similar to abnormality datums
-
-/datum/sailor
-	var/name = "Sailor"
-	/// We'll use abnormality risk levels as a comparable metric for its tier
-	var/threat_level = ZAYIN_LEVEL
-	var/mob/living/simple_animal/hostile/sailor/mob_path
-	/// Reference to the door we own, only used for records swapping
-	var/obj/machinery/door/airlock/door
-	/// Reference to current mob, if alive
-	var/mob/living/simple_animal/hostile/sailor/current
-	/// Reference to respawn landmark
-	var/obj/effect/landmark/sailor_spawn/landmark
-
-/datum/sailor/New(obj/effect/landmark/sailor_spawn/new_landmark, mob/living/simple_animal/hostile/sailor/new_type)
-	if(!new_landmark)
-		CRASH("Sailor datum was created without reference to landmark.")
-	if(!ispath(new_type))
-		CRASH("Sailor datum was created without a path to the mob.")
-	landmark = new_landmark
-	mob_path = new_type
-	name = initial(mob_path.name)
-	to_chat(world, "Sailor datum has been created with mob path [mob_path]. Calling RespawnMob()!")
-
-/datum/sailor/proc/RespawnMob()//doesn't work
-	if(!istype(landmark))
-		CRASH("Couldn't respawn an sailor [initial(mob_path.name)] due to missing landmark.")
-	if(!ispath(mob_path))
-		CRASH("Sailor tried to respawn a mob, but mob path wasn't valid.")
-	if(istype(current))
-		to_chat(world, "sailor failed istype() check")
-		return
-	var/turf/T = get_turf(landmark)
-	current = new mob_path(T)
-	to_chat(world, "Creating sailor mob [current] at landmark located at [T]")
-	current.datum_reference = src
-	current.setDir(WEST)
-	name = current.name
-
-/obj/structure/sailor_spawner //DEBUG OBJECT, REMOVE FROM PULL REQUEST
-	name = "sailor spawner"
-	desc = "A place to buy sailors"
-	icon = 'icons/obj/vending.dmi'
-	icon_state = "liberationstation"
-	anchored = TRUE
-	density = TRUE
-	var/obj/vehicle/sealed/adventure_boat/mom
-	var/datum/sailor/dad
-	var/mob_path = /mob/living/simple_animal/hostile/sailor/noob
-
-/obj/structure/sailor_spawner/attack_hand(mob/living/carbon/human/user)//whatever's going on here doesn't work
-	say("Attempting to spawn a sailor!")
-	for(var/obj/structure/boat_interior/I in view())
-		mom = I.current_vessel
-		if(!mom)
-			say("Vessel not found!")
-			return
-		if(mom.my_sailor)
-			say("Vessel already has a sailor!")
-			return
-		dad = new(new_landmark = I, new_type = mob_path)
-		//dad.mob_path = mob_path
-		mom.AddSailor(dad)
-		say("AddSailor has been called!")

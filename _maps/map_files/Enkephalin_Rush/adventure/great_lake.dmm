@@ -100,10 +100,6 @@
 	},
 /turf/open/floor/wood,
 /area/city)
-"A" = (
-/obj/structure/sailor_spawner,
-/turf/open/floor/wood,
-/area/city)
 "B" = (
 /obj/structure/boat_interior,
 /turf/open/floor/wood,
@@ -120,7 +116,7 @@
 /turf/open/water/deep,
 /area/space)
 "E" = (
-/obj/structure/boat_shop,
+/obj/machinery/computer/boat_shop,
 /turf/open/floor/wood,
 /area/city)
 "G" = (
@@ -1482,7 +1478,7 @@ r
 M
 Z
 B
-A
+Z
 Z
 M
 r

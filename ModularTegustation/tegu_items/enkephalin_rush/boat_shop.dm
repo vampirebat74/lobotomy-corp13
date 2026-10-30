@@ -85,9 +85,9 @@
 				return
 			switch(product_datum.category)
 				if(CAT_BOAT)
-					spawn_ship(product_datum.equipment_path)
+					SpawnShip(product_datum.equipment_path)
 				if(CAT_SAILOR)
-					if(!spawn_sailor(usr, product_datum.equipment_path))
+					if(!SpawnSailor(usr, product_datum.equipment_path))
 						account.adjust_money(product_datum.cost)//refund if it fails to generate a sailor
 						playsound(get_turf(src), 'sound/machines/terminal_prompt_deny.ogg', 50, TRUE)
 						updateUsrDialog()
@@ -97,7 +97,7 @@
 			updateUsrDialog()
 			return TRUE
 
-obj/machinery/computer/boat_shop/proc/spawn_ship(obj/vehicle/sealed/adventure_boat/picked_type)
+obj/machinery/computer/boat_shop/proc/SpawnShip(obj/vehicle/sealed/adventure_boat/picked_type)
 	if(!LAZYLEN(GLOB.lobotomy_boats))
 		say("There are too many boats at sea! Try later.")
 	else
@@ -107,7 +107,7 @@ obj/machinery/computer/boat_shop/proc/spawn_ship(obj/vehicle/sealed/adventure_bo
 		current_boats += myboat
 		myboat.CheckCaptain(usr)
 
-obj/machinery/computer/boat_shop/proc/spawn_sailor(mob/user, mob/living/simple_animal/hostile/sailor/picked_type)
+obj/machinery/computer/boat_shop/proc/SpawnSailor(mob/user, mob/living/simple_animal/hostile/sailor/picked_type)
 	if(!LAZYLEN(current_boats))
 		say("There are no boats currently available.")
 		return FALSE
@@ -119,8 +119,11 @@ obj/machinery/computer/boat_shop/proc/spawn_sailor(mob/user, mob/living/simple_a
 		if(!chosen_boat.CheckCaptain(user))
 			say("You are not the captain of the [chosen_boat]")
 			return FALSE
-		var/datum/sailor/new_sailor = new picked_type(chosen_boat.interior)
-		chosen_boat.AddSailor(new_sailor)
+		if(!chosen_boat.my_sailor)
+			var/datum/sailor/new_sailor = new picked_type(chosen_boat.interior)
+			chosen_boat.AddSailor(new_sailor)
+		else
+			chosen_boat.UpdateSailor(picked_type)
 		to_chat(user, "The [chosen_boat] will now be guided by a new sailor.")
 	return TRUE
 

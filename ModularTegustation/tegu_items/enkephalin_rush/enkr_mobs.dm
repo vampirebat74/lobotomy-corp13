@@ -528,6 +528,8 @@
 	desc = "An odd sailor of no particular association. The gods should hear about this."
 	maxHealth = 20
 	health = 20
+	melee_damage_lower = 5
+	melee_damage_upper = 10
 	icon = 'icons/mob/simple_human.dmi'
 	icon_state = "piratemelee"
 	faction = list("neutral")
@@ -560,20 +562,37 @@
 	name = "Crawdad Office Sailor"
 	desc = "This fixer represents the U-corp branch from a large office in district 4. They appear to be highly inbred."
 	threat_level = TETH_LEVEL
+	melee_damage_lower = 10
+	melee_damage_upper = 15
 
 /mob/living/simple_animal/hostile/sailor/pro
 	name = "Eight Association Sailor"
 	desc = "A representative of the Eight Association, masters of all things nautical."
 	threat_level = WAW_LEVEL
 	/datum/outfit/job/civilian
+	melee_damage_lower = 20
+	melee_damage_upper = 25
+
+/mob/living/simple_animal/hostile/sailor/basspro
+	name = "Eight Association Captain"
+	desc = "The leader of the Eight Association South Section 2. An acclaimed grade 1 sailor with decades of experience. He wields a harpoon made from the All-Piercing Marlin Whale's spines."
+	gender = "male"
+	threat_level = ALEPH_LEVEL
+	/datum/outfit/job/civilian
+	melee_damage_lower = 50
+	melee_damage_upper = 55
 
 /mob/living/simple_animal/hostile/sailor/pirate
 	name = "Not-Twinhooks Pirate"
 	desc = "The syndicates of U-corp are known for being particularly cruel and heartless. Members of these syndicates are often referred to as 'pirates'."
 	threat_level = HE_LEVEL
+	melee_damage_lower = 20
+	melee_damage_upper = 25
 
 /mob/living/simple_animal/hostile/sailor/pirate_captain
 	name = "Not-Twinhooks Captain"
 	desc = "The syndicates of U-corp are known for being particularly cruel and heartless. Members of these syndicates are often referred to as 'pirates'."
 	icon_state = "pirateranged"
 	threat_level = WAW_LEVEL
+	melee_damage_lower = 25
+	melee_damage_upper = 30

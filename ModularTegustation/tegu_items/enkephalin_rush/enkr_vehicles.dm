@@ -1,5 +1,6 @@
 GLOBAL_LIST_EMPTY(lobotomy_boats)
 
+//Refer to LakeGenerator.dm for lake generation and procs
 /obj/vehicle/sealed/adventure_boat
 	name = "boat"
 	desc = "A boat. This shouldn't be available."
@@ -13,6 +14,8 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	var/obj/structure/boat_interior/interior
 	var/datum/sailor/my_sailor
 	var/mob/living/captain
+	var/warning_cooldown = 0//hardcoded to 1 second
+	var/can_move = TRUE
 	max_occupants = 1
 
 /obj/vehicle/sealed/adventure_boat/Initialize()
@@ -46,6 +49,8 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	. += "It can carry [max_occupants] occupants."
 
 /obj/vehicle/sealed/adventure_boat/relaymove(mob/living/user, direction)
+	if(!can_move)
+		return FALSE
 	vehicle_move(direction)
 	return TRUE
 
@@ -66,28 +71,38 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	. = ..()
 	update_icon()
 
-/obj/vehicle/sealed/adventure_boat/say(message as text, language, ignore_spam, forced, sanitize, spans)
+/obj/vehicle/sealed/adventure_boat/proc/BoatWarning(atom/A, atom/B)
 	if(!my_sailor)//The boat should generally not speak without a sailor present
 		return
+	if(warning_cooldown > world.time)
+		return
+	for(var/mob/living/L in occupants)
+		L.playsound_local(get_turf(L), 'sound/creatures/lc13/lake_entity/radar_beep.ogg', 35, 0)
+	warning_cooldown = world.time + (1 SECONDS)
 	var/former_name = name
 	name = my_sailor.name
-	..()
+	say("Entering [A] lake of [B]! This is debug text.")
+	if(my_sailor.current)
+		my_sailor.current.say("Entering [A] lake of [B]! This is debug text.")
 	name = former_name
 
 /obj/vehicle/sealed/adventure_boat/proc/AddSailor(datum/sailor/D)
 	if(my_sailor)
 		qdel(my_sailor)
 	my_sailor = D
-	var/spawned = FALSE
 	for(var/turf/T in shipturfs)
 		for(var/obj/effect/landmark/sailor_spawn/L in T)
 			D.landmark = L
 			D.RespawnMob()
-			to_chat(world, "L [L] has been assigned and RespawnMob() has been called on datum [D]")
-			spawned = TRUE
 			break
-	if(!spawned)
-		to_chat(world, "AddSailor on [D] has failed to activate. Check if the landmark has been found.")
+
+/obj/vehicle/sealed/adventure_boat/proc/UpdateSailor(datum/sailor/D)
+	if(!my_sailor)
+		return
+	my_sailor.mob_path = D.mob_path
+	qdel(my_sailor.current)
+	my_sailor.threat_level = D.threat_level
+	my_sailor.RespawnMob()
 
 /obj/vehicle/sealed/adventure_boat/proc/CheckCaptain(mob/living/carbon/user)
 	if(!captain)
@@ -102,6 +117,15 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 	if(user != captain)
 		return FALSE
 	return TRUE
+
+/obj/vehicle/sealed/adventure_boat/proc/WhaleAttack()
+	for(var/mob/living/L in occupants)
+		var/turf/T = get_turf(L)
+		if(!(T in shipturfs))
+			L.forceMove(get_turf(interior))
+		L.playsound_local(get_turf(L), 'sound/effects/ordeals/whale_start.ogg', 35, 0)
+	new /mob/living/simple_animal/hostile/ordeal/mermaid_porous(get_turf(interior))
+	can_move = TRUE
 
 /obj/vehicle/sealed/adventure_boat/skiff
 	name = "skiff"
@@ -147,19 +171,15 @@ GLOBAL_LIST_EMPTY(lobotomy_boats)
 		CRASH("Sailor datum was created without a path to the mob.")
 	landmark = new_landmark
 	name = initial(mob_path.name)
-	to_chat(world, "Sailor datum has been created with mob path [mob_path]. Calling RespawnMob()!")
 
 /datum/sailor/proc/RespawnMob()//doesn't work
 	if(!istype(landmark))
 		CRASH("Couldn't respawn an sailor [initial(mob_path.name)] due to missing landmark.")
 	if(!ispath(mob_path))
 		CRASH("Sailor tried to respawn a mob, but mob path wasn't valid.")
-	if(istype(current))
-		to_chat(world, "sailor failed istype() check")//debug text
 		return
 	var/turf/T = get_turf(landmark)
 	current = new mob_path(T)
-	to_chat(world, "Creating sailor mob [current] at landmark located at [T]")//debug text
 	current.datum_reference = src
 	current.setDir(WEST)
 	name = current.name

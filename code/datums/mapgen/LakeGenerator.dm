@@ -1,5 +1,9 @@
 //Might need to do away with this entirely and have something else generate the lakes
 
+#define WAVE_ATTACK 1
+#define WAVE_PERSISTENT 2
+#define WAVE_OBJECT 2
+
 GLOBAL_LIST_INIT(lake_colors, list(
 	COLOR_WHITE,
 	COLOR_SILVER,
@@ -165,21 +169,31 @@ GLOBAL_LIST_INIT(lake_colors, list(
 	var/generated = FALSE
 	var/water_color
 	var/risk_level = 1
+	var/whale_chance = 30//Roll for this somewhere later in the code
+	var/whale_type = /mob/living/simple_animal/hostile/ordeal/mermaid_porous
+	var/wave_damage_type = RED_DAMAGE
+	var/wave_damage = 15
+	var/wave_effect = /obj/effect/temp_visual/fire
+	var/wave_type = WAVE_ATTACK
 
 
 /area/great_lake/Initialize(mapload)
 	name = ""
 	law_text = pick(law_list)
 	..()
+	wave_damage = risk_level * 15
 	RunGeneration()
 	ColorWater()
 
 /area/great_lake/Entered(atom/movable/obj, atom/OldLoc)
 	..()
-	var/obj/vehicle/sealed/adventure_boat/boat = obj
-	if(!istype(boat, obj))
-		return
-	boat.say("Entering [water_color] lake of [law_text]! Move this shit to the sailor's code!")
+	//if(!ishuman(obj))
+	//	return
+	for(var/obj/vehicle/sealed/adventure_boat/boat in get_turf(obj))
+		boat.BoatWarning(water_color, law_text)
+		if(prob(50))
+			ActivateWave(boat)
+		break
 
 /area/great_lake/proc/ColorWater()
 	if(!water_color)
@@ -187,6 +201,37 @@ GLOBAL_LIST_INIT(lake_colors, list(
 	for(var/turf/T in contents)
 		T.color = water_color
 
+/area/great_lake/proc/ActivateWave(obj/vehicle/sealed/adventure_boat/boat)
+	boat.can_move = FALSE
+	var/spawning = FALSE
+	var/wave_sound = 'sound/creatures/lc13/lake_entity/water_out.ogg'
+	var/sleep_time = 4 SECONDS
+	if(prob(whale_chance))
+		spawning = TRUE
+		sleep_time = 5 SECONDS
+		wave_sound = 'sound/creatures/lc13/lake_entity/whale_moving.ogg'
+	for(var/mob/living/L in boat.occupants)
+		L.playsound_local(get_turf(L), wave_sound, 35, 0)
+		shake_camera(L, 20, 3)
+	sleep(sleep_time)
+	if(spawning == TRUE)
+		boat.WhaleAttack(whale_type)
+		return
+	else
+		new wave_effect(get_turf(boat))
+		for(var/turf/T in view(boat))
+			if(prob(30))
+				new wave_effect(T)
+		for(var/mob/living/L in boat.occupants)
+			L.deal_damage(wave_damage, wave_damage_type)
+			L.playsound_local(get_turf(L), 'sound/creatures/lc13/lake_entity/boat_hit.ogg', 35, 0)
+			shake_camera(L, 5, 10)
+	boat.can_move = TRUE
+
 /area/great_lake/random_lake
 	name = "Random Lake"
 	map_generator = null
+
+#undef WAVE_ATTACK
+#undef WAVE_PERSISTENT
+#undef WAVE_OBJECT
